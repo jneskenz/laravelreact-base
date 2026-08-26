@@ -14,6 +14,7 @@ export default function AppLogo() {
                 <span className="mb-0.5 truncate leading-tight font-semibold">
                     {name}
                 </span>
+                {/* <span className="">v1</span> */}
             </div>
         </>
     );

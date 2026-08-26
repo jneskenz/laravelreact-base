@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import { BookOpen, FolderGit2, LayoutGrid } from 'lucide-react';
+import { BookOpen, FolderGit2, LayoutGrid, LayoutList } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -14,6 +14,7 @@ import {
     SidebarMenuItem,
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
+import { institucional, proyectos, reconocimientos } from '@/routes/cms';
 import type { NavItem } from '@/types';
 
 const mainNavItems: NavItem[] = [
@@ -22,6 +23,63 @@ const mainNavItems: NavItem[] = [
         href: dashboard(),
         icon: LayoutGrid,
     },
+    {
+        title: 'CMS',
+        href: '#',
+        icon: LayoutList,
+        items: [
+            {
+                title: 'Institucional',
+                href: institucional(),
+            },
+            {
+                title: 'Proyectos',
+                href: proyectos(),
+            },
+            {
+                title: 'Reconocimientos',
+                href: reconocimientos(),
+            },
+        ],
+    },
+    {
+        title: 'Administracion',
+        href: '#',
+        icon: LayoutList,
+        items: [
+            {
+                title: 'Usuarios',
+                href: '#',
+            },
+            {
+                title: 'Roles y permisos',
+                href: '#',
+            },
+            {
+                title: 'Configuracion',
+                href: '#',
+            },
+        ],
+    },
+    {
+        title: 'Denuncias',
+        href: '#',
+        icon: LayoutList,
+        items: [
+            {
+                title: 'Bandeja de denuncias',
+                href: '#',
+            },
+            {
+                title: 'Derivaciones',
+                href: '#',
+            },
+            {
+                title: 'Seguimiento',
+                href: '#',
+            },
+        ],
+    }
 ];
 
 const footerNavItems: NavItem[] = [
