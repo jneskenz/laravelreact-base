@@ -19,7 +19,7 @@ export function NavMain({ items = [] }: { items: NavItem[] }) {
 
     return (
         <SidebarGroup className="px-2 py-0">
-            <SidebarGroupLabel>Plataforma</SidebarGroupLabel>
+            <SidebarGroupLabel>CMS</SidebarGroupLabel>
             <SidebarMenu>
                 {items.map((item) =>
                     item.items?.length ? (

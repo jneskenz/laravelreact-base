@@ -1,5 +1,5 @@
 import { Link } from '@inertiajs/react';
-import { BookOpen, FolderGit2, LayoutGrid, LayoutList } from 'lucide-react';
+import { BookOpen, FolderGit2, LayoutGrid, LayoutList, Users } from 'lucide-react';
 import AppLogo from '@/components/app-logo';
 import { NavFooter } from '@/components/nav-footer';
 import { NavMain } from '@/components/nav-main';
@@ -15,6 +15,7 @@ import {
 } from '@/components/ui/sidebar';
 import { dashboard } from '@/routes';
 import { institucional, proyectos, reconocimientos } from '@/routes/cms';
+import { index as usersIndex } from '@/routes/admin/users';
 import type { NavItem } from '@/types';
 
 const mainNavItems: NavItem[] = [
@@ -45,11 +46,11 @@ const mainNavItems: NavItem[] = [
     {
         title: 'Administracion',
         href: '#',
-        icon: LayoutList,
+        icon: Users,
         items: [
             {
                 title: 'Usuarios',
-                href: '#',
+                href: usersIndex(),
             },
             {
                 title: 'Roles y permisos',
