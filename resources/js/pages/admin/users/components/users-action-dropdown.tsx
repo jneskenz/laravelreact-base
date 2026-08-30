@@ -1,3 +1,4 @@
+import { Link, router } from '@inertiajs/react';
 import { Ellipsis, Pencil, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -7,12 +8,21 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
+import { destroy, edit } from '@/routes/admin/users';
 
 type Props = {
     userId: number;
 };
 
 export function UsersActionDropdown({ userId }: Props) {
+    function handleDelete() {
+        if (confirm('¿Estás seguro de que deseas eliminar este usuario?')) {
+            router.delete(destroy.url(userId), {
+                preserveScroll: true,
+            });
+        }
+    }
+
     return (
         <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -27,12 +37,14 @@ export function UsersActionDropdown({ userId }: Props) {
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-[160px]">
-                <DropdownMenuItem>
-                    <Pencil className="mr-2 size-4" />
-                    Editar
+                <DropdownMenuItem asChild>
+                    <Link href={edit.url(userId)}>
+                        <Pencil className="mr-2 size-4" />
+                        Editar
+                    </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
-                <DropdownMenuItem variant="destructive">
+                <DropdownMenuItem variant="destructive" onClick={handleDelete}>
                     <Trash2 className="mr-2 size-4" />
                     Eliminar
                 </DropdownMenuItem>

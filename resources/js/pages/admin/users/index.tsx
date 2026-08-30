@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Head } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import { MailPlus, UserPlus } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -12,7 +12,7 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
-import { index } from '@/routes/admin/users';
+import { create, index } from '@/routes/admin/users';
 import { UsersActionDropdown } from './components/users-action-dropdown';
 import { UsersPagination } from './components/users-pagination';
 import { UsersToolbar } from './components/users-toolbar';
@@ -104,9 +104,11 @@ export default function UsersIndex({ users, filters }: Props) {
                             <MailPlus className="mr-2 size-4" />
                             Invitar Usuario
                         </Button>
-                        <Button id="users-add-btn">
-                            <UserPlus className="mr-2 size-4" />
-                            Nuevo Usuario
+                        <Button id="users-add-btn" asChild>
+                            <Link href={create.url()}>
+                                <UserPlus className="mr-2 size-4" />
+                                Nuevo Usuario
+                            </Link>
                         </Button>
                     </div>
                 </div>
