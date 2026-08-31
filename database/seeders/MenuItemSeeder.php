@@ -206,7 +206,7 @@ class MenuItemSeeder extends Seeder
             ['key' => 'usuarios.internos', 'label' => 'Usuarios internos', 'route' => 'admin.users.index', 'url' => '/admin/users', 'permission_required' => 'usuarios.gestionar', 'order' => 1],
             ['key' => 'usuarios.externos', 'label' => 'Usuarios externos', 'url' => '/panel/usuarios/externos', 'permission_required' => 'usuarios.gestionar', 'order' => 2],
             ['key' => 'usuarios.roles', 'label' => 'Roles y permisos', 'url' => '/panel/usuarios/roles', 'permission_required' => 'roles.gestionar', 'order' => 3],
-            ['key' => 'usuarios.menus', 'label' => 'Asignación de menús', 'url' => '/panel/usuarios/menus', 'permission_required' => 'roles.gestionar', 'order' => 4],
+            ['key' => 'usuarios.menus', 'label' => 'Asignación de menús', 'route' => 'admin.menus.index', 'url' => '/admin/menus', 'permission_required' => 'roles.gestionar', 'order' => 4],
         ]);
 
         // 12. Reportes
