@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\MenuManagementController;
+use App\Http\Controllers\Admin\RoleController;
 use App\Http\Controllers\Admin\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -8,9 +9,11 @@ Route::middleware(['auth', 'verified'])->prefix('panel')->name('panel.')->group(
     // Dashboard interno
     Route::inertia('dashboard', 'dashboard')->name('dashboard');
 
-    // Gestión de acceso - Usuarios
+    // Gestión de acceso - Usuarios y Roles
+    Route::put('usuarios/{user}/roles', [UserController::class, 'updateRoles'])->name('usuarios.update-roles');
     Route::resource('usuarios', UserController::class)->except(['show'])->parameters(['usuarios' => 'user'])->names('usuarios');
     Route::resource('users', UserController::class)->except(['show'])->parameters(['users' => 'user'])->names('users');
+    Route::resource('roles', RoleController::class)->except(['show'])->names('roles');
 
     // Gestión de acceso - Asignación de Menús
     Route::get('menus', [MenuManagementController::class, 'index'])->name('menus.index');

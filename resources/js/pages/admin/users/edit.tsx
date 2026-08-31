@@ -1,20 +1,14 @@
 import { Head } from '@inertiajs/react';
 import { edit as editRoute, index, update } from '@/routes/panel/usuarios';
-import { UserForm } from './components/user-form';
-
-type User = {
-    id: number;
-    name: string;
-    email: string;
-    email_verified_at: string | null;
-    created_at: string;
-};
+import { RoleItem, ExternalCapability, UserFormData, UserForm } from './components/user-form';
 
 type Props = {
-    user: User;
+    user: UserFormData;
+    roles: RoleItem[];
+    external_capabilities: ExternalCapability[];
 };
 
-export default function UsersEdit({ user }: Props) {
+export default function UsersEdit({ user, roles, external_capabilities }: Props) {
     return (
         <>
             <Head title={`Editar — ${user.name}`} />
@@ -22,14 +16,16 @@ export default function UsersEdit({ user }: Props) {
                 <div>
                     <h1 className="text-2xl font-bold tracking-tight">Editar Usuario</h1>
                     <p className="text-muted-foreground text-sm">
-                        Modifica los datos de <strong>{user.name}</strong>.
+                        Modifica los datos, tipo de usuario y roles/permisos de <strong>{user.name}</strong>.
                     </p>
                 </div>
 
                 <div className="mx-auto w-full max-w-2xl">
                     <UserForm
                         user={user}
-                        action={update.url(user.id)}
+                        roles={roles}
+                        externalCapabilities={external_capabilities}
+                        action={update.url(user.id!)}
                         method="put"
                     />
                 </div>
@@ -41,7 +37,7 @@ export default function UsersEdit({ user }: Props) {
 UsersEdit.layout = {
     breadcrumbs: [
         {
-            title: 'Administracion',
+            title: 'Gestión de acceso',
             href: '#',
         },
         {

@@ -1,5 +1,5 @@
 import { Link, router } from '@inertiajs/react';
-import { Ellipsis, Pencil, Trash2 } from 'lucide-react';
+import { Ellipsis, Pencil, Shield, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
     DropdownMenu,
@@ -12,9 +12,10 @@ import { destroy, edit } from '@/routes/panel/usuarios';
 
 type Props = {
     userId: number;
+    onAssignRole?: () => void;
 };
 
-export function UsersActionDropdown({ userId }: Props) {
+export function UsersActionDropdown({ userId, onAssignRole }: Props) {
     function handleDelete() {
         if (confirm('¿Estás seguro de que deseas eliminar este usuario?')) {
             router.delete(destroy.url(userId), {
@@ -36,11 +37,17 @@ export function UsersActionDropdown({ userId }: Props) {
                     <span className="sr-only">Abrir menú</span>
                 </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-[160px]">
+            <DropdownMenuContent align="end" className="w-[170px]">
+                {onAssignRole && (
+                    <DropdownMenuItem onClick={onAssignRole}>
+                        <Shield className="mr-2 size-4 text-primary" />
+                        Asignar Rol
+                    </DropdownMenuItem>
+                )}
                 <DropdownMenuItem asChild>
                     <Link href={edit.url(userId)}>
                         <Pencil className="mr-2 size-4" />
-                        Editar
+                        Editar Usuario
                     </Link>
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />

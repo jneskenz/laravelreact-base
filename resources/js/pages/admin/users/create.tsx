@@ -1,8 +1,13 @@
 import { Head } from '@inertiajs/react';
 import { create as createRoute, index, store } from '@/routes/panel/usuarios';
-import { UserForm } from './components/user-form';
+import { RoleItem, ExternalCapability, UserForm } from './components/user-form';
 
-export default function UsersCreate() {
+type Props = {
+    roles: RoleItem[];
+    external_capabilities: ExternalCapability[];
+};
+
+export default function UsersCreate({ roles, external_capabilities }: Props) {
     return (
         <>
             <Head title="Nuevo Usuario" />
@@ -10,12 +15,17 @@ export default function UsersCreate() {
                 <div>
                     <h1 className="text-2xl font-bold tracking-tight">Nuevo Usuario</h1>
                     <p className="text-muted-foreground text-sm">
-                        Completa el formulario para crear un nuevo usuario en el sistema.
+                        Completa el formulario para crear un nuevo usuario y asignar su rol o permisos.
                     </p>
                 </div>
 
                 <div className="mx-auto w-full max-w-2xl">
-                    <UserForm action={store.url()} method="post" />
+                    <UserForm
+                        roles={roles}
+                        externalCapabilities={external_capabilities}
+                        action={store.url()}
+                        method="post"
+                    />
                 </div>
             </div>
         </>
@@ -25,7 +35,7 @@ export default function UsersCreate() {
 UsersCreate.layout = {
     breadcrumbs: [
         {
-            title: 'Administracion',
+            title: 'Gestión de acceso',
             href: '#',
         },
         {

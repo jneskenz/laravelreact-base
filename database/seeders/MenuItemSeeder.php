@@ -203,10 +203,9 @@ class MenuItemSeeder extends Seeder
             'order' => 11,
         ]);
         $this->createChildren($usuarios, [
-            ['key' => 'usuarios.internos', 'label' => 'Usuarios internos', 'route' => 'panel.usuarios.index', 'url' => '/panel/usuarios', 'permission_required' => 'usuarios.gestionar', 'order' => 1],
-            ['key' => 'usuarios.externos', 'label' => 'Usuarios externos', 'url' => '/panel/usuarios/externos', 'permission_required' => 'usuarios.gestionar', 'order' => 2],
-            ['key' => 'usuarios.roles', 'label' => 'Roles y permisos', 'url' => '/panel/usuarios/roles', 'permission_required' => 'roles.gestionar', 'order' => 3],
-            ['key' => 'usuarios.menus', 'label' => 'Asignación de menús', 'route' => 'panel.menus.index', 'url' => '/panel/menus', 'permission_required' => 'roles.gestionar', 'order' => 4],
+            ['key' => 'usuarios.lista', 'label' => 'Usuarios', 'route' => 'panel.usuarios.index', 'url' => '/panel/usuarios', 'permission_required' => 'usuarios.gestionar', 'order' => 1],
+            ['key' => 'usuarios.roles', 'label' => 'Roles y permisos', 'route' => 'panel.roles.index', 'url' => '/panel/roles', 'permission_required' => 'roles.gestionar', 'order' => 2],
+            ['key' => 'usuarios.menus', 'label' => 'Asignación de menús', 'route' => 'panel.menus.index', 'url' => '/panel/menus', 'permission_required' => 'roles.gestionar', 'order' => 3],
         ]);
 
         // 12. Reportes

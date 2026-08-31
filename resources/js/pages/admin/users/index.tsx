@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Head, Link } from '@inertiajs/react';
-import { MailPlus, UserPlus } from 'lucide-react';
+import { MailPlus, UserPlus, ShieldCheck, Users as UsersIcon } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -15,12 +15,26 @@ import {
 import { create, index } from '@/routes/panel/usuarios';
 import { UsersActionDropdown } from './components/users-action-dropdown';
 import { UsersPagination } from './components/users-pagination';
-import { UsersToolbar } from './components/users-toolbar';
+import { UsersToolbar, type UserFilters } from './components/users-toolbar';
+import {
+    UserRoleDialog,
+    type RoleOption,
+    type ExternalCapability,
+    type UserForRole,
+} from './components/user-role-dialog';
+
+type PermissionItem = {
+    id: number;
+    name: string;
+};
 
 type User = {
     id: number;
     name: string;
     email: string;
+    tipo_usuario: 'interno' | 'externo';
+    roles?: RoleOption[];
+    permissions?: PermissionItem[];
     email_verified_at: string | null;
     created_at: string;
 };
@@ -35,15 +49,11 @@ type PaginatedUsers = {
     to: number | null;
 };
 
-type Filters = {
-    search: string;
-    status: string;
-    per_page: number;
-};
-
 type Props = {
     users: PaginatedUsers;
-    filters: Filters;
+    roles: RoleOption[];
+    external_capabilities: ExternalCapability[];
+    filters: UserFilters;
 };
 
 function getInitials(name: string): string {
@@ -55,8 +65,10 @@ function getInitials(name: string): string {
         .toUpperCase();
 }
 
-export default function UsersIndex({ users, filters }: Props) {
+export default function UsersIndex({ users, roles, external_capabilities, filters }: Props) {
     const [selectedIds, setSelectedIds] = useState<Set<number>>(new Set());
+    const [selectedUserForRole, setSelectedUserForRole] = useState<UserForRole | null>(null);
+    const [roleDialogOpen, setRoleDialogOpen] = useState(false);
 
     const allOnPageSelected = users.data.length > 0 && users.data.every((u) => selectedIds.has(u.id));
     const someOnPageSelected = users.data.some((u) => selectedIds.has(u.id));
@@ -87,6 +99,11 @@ export default function UsersIndex({ users, filters }: Props) {
         });
     }
 
+    function handleOpenAssignRole(user: User) {
+        setSelectedUserForRole(user);
+        setRoleDialogOpen(true);
+    }
+
     return (
         <>
             <Head title="Usuarios" />
@@ -96,7 +113,7 @@ export default function UsersIndex({ users, filters }: Props) {
                     <div>
                         <h1 className="text-2xl font-bold tracking-tight">Usuarios</h1>
                         <p className="text-muted-foreground text-sm">
-                            Aquí tienes la lista de todos los usuarios del sistema.
+                            Aquí tienes la lista de todos los usuarios registrados (staff interno y usuarios del portal).
                         </p>
                     </div>
                     <div className="flex gap-2">
@@ -114,10 +131,10 @@ export default function UsersIndex({ users, filters }: Props) {
                 </div>
 
                 {/* Toolbar: búsqueda + filtros */}
-                <UsersToolbar filters={filters} />
+                <UsersToolbar filters={filters} roles={roles} />
 
                 {/* Tabla */}
-                <div className="rounded-lg border border-sidebar-border/70 dark:border-sidebar-border">
+                <div className="rounded-lg border border-sidebar-border/70 dark:border-sidebar-border overflow-hidden">
                     <Table>
                         <TableHeader>
                             <TableRow className="hover:bg-transparent">
@@ -133,73 +150,147 @@ export default function UsersIndex({ users, filters }: Props) {
                                     />
                                 </TableHead>
                                 <TableHead>Usuario</TableHead>
+                                <TableHead>Tipo</TableHead>
+                                <TableHead>Rol / Capacidades</TableHead>
                                 <TableHead>Estado</TableHead>
                                 <TableHead className="hidden md:table-cell">Creado</TableHead>
-                                <TableHead className="w-[50px]" />
+                                <TableHead className="w-[50px] text-right">Acciones</TableHead>
                             </TableRow>
                         </TableHeader>
                         <TableBody>
                             {users.data.length === 0 ? (
                                 <TableRow>
-                                    <TableCell colSpan={5} className="text-muted-foreground h-24 text-center">
-                                        No se encontraron usuarios.
+                                    <TableCell colSpan={7} className="text-muted-foreground h-24 text-center">
+                                        No se encontraron usuarios con los filtros seleccionados.
                                     </TableCell>
                                 </TableRow>
                             ) : (
-                                users.data.map((user) => (
-                                    <TableRow
-                                        key={user.id}
-                                        data-state={selectedIds.has(user.id) ? 'selected' : undefined}
-                                    >
-                                        <TableCell>
-                                            <Checkbox
-                                                id={`users-select-${user.id}`}
-                                                checked={selectedIds.has(user.id)}
-                                                onCheckedChange={(checked) =>
-                                                    toggleRow(user.id, !!checked)
-                                                }
-                                                aria-label={`Seleccionar ${user.name}`}
-                                                className="translate-y-0.5"
-                                            />
-                                        </TableCell>
-                                        <TableCell>
-                                            <div className="flex items-center gap-3">
-                                                <div className="bg-primary/10 text-primary flex size-8 shrink-0 items-center justify-center rounded-full text-xs font-semibold">
-                                                    {getInitials(user.name)}
+                                users.data.map((user) => {
+                                    const isInterno = user.tipo_usuario === 'interno';
+
+                                    return (
+                                        <TableRow
+                                            key={user.id}
+                                            data-state={selectedIds.has(user.id) ? 'selected' : undefined}
+                                        >
+                                            <TableCell>
+                                                <Checkbox
+                                                    id={`users-select-${user.id}`}
+                                                    checked={selectedIds.has(user.id)}
+                                                    onCheckedChange={(checked) =>
+                                                        toggleRow(user.id, !!checked)
+                                                    }
+                                                    aria-label={`Seleccionar ${user.name}`}
+                                                    className="translate-y-0.5"
+                                                />
+                                            </TableCell>
+
+                                            {/* Nombre y Email */}
+                                            <TableCell>
+                                                <div className="flex items-center gap-3">
+                                                    <div className="bg-primary/10 text-primary flex size-8 shrink-0 items-center justify-center rounded-full text-xs font-semibold">
+                                                        {getInitials(user.name)}
+                                                    </div>
+                                                    <div className="min-w-0">
+                                                        <p className="truncate font-medium leading-none">
+                                                            {user.name}
+                                                        </p>
+                                                        <p className="text-muted-foreground mt-1 truncate text-xs">
+                                                            {user.email}
+                                                        </p>
+                                                    </div>
                                                 </div>
-                                                <div className="min-w-0">
-                                                    <p className="truncate font-medium leading-none">
-                                                        {user.name}
-                                                    </p>
-                                                    <p className="text-muted-foreground mt-1 truncate text-xs">
-                                                        {user.email}
-                                                    </p>
+                                            </TableCell>
+
+                                            {/* Tipo de Usuario */}
+                                            <TableCell>
+                                                {isInterno ? (
+                                                    <Badge className="bg-sky-100/40 text-sky-900 border-sky-200 dark:text-sky-200 text-xs">
+                                                        Staff Interno
+                                                    </Badge>
+                                                ) : (
+                                                    <Badge className="bg-purple-100/40 text-purple-900 border-purple-200 dark:text-purple-200 text-xs">
+                                                        Usuario Externo
+                                                    </Badge>
+                                                )}
+                                            </TableCell>
+
+                                            {/* Roles / Capacidades */}
+                                            <TableCell>
+                                                <div className="flex flex-wrap gap-1 max-w-[260px]">
+                                                    {isInterno ? (
+                                                        user.roles && user.roles.length > 0 ? (
+                                                            user.roles.map((r) => (
+                                                                <Badge
+                                                                    key={r.id}
+                                                                    variant="secondary"
+                                                                    className="gap-1 text-[11px] font-normal"
+                                                                >
+                                                                    <ShieldCheck className="size-3 text-primary" />
+                                                                    {r.name}
+                                                                </Badge>
+                                                            ))
+                                                        ) : (
+                                                            <span className="text-muted-foreground text-xs italic">
+                                                                Sin rol asignado
+                                                            </span>
+                                                        )
+                                                    ) : (
+                                                        user.permissions && user.permissions.length > 0 ? (
+                                                            user.permissions.map((p) => {
+                                                                const shortName = p.name.split('.')[0];
+                                                                return (
+                                                                    <Badge
+                                                                        key={p.id}
+                                                                        variant="outline"
+                                                                        className="text-[10px] px-1.5 py-0 h-4 capitalize"
+                                                                    >
+                                                                        <UsersIcon className="mr-1 size-2.5" />
+                                                                        {shortName}
+                                                                    </Badge>
+                                                                );
+                                                            })
+                                                        ) : (
+                                                            <span className="text-muted-foreground text-xs italic">
+                                                                Sin actividades registradas
+                                                            </span>
+                                                        )
+                                                    )}
                                                 </div>
-                                            </div>
-                                        </TableCell>
-                                        <TableCell>
-                                            {user.email_verified_at ? (
-                                                <Badge className="bg-teal-100/30 text-teal-900 border-teal-200 dark:text-teal-200">
-                                                    Verificado
-                                                </Badge>
-                                            ) : (
-                                                <Badge className="bg-amber-100/30 text-amber-900 border-amber-200 dark:text-amber-200">
-                                                    Pendiente
-                                                </Badge>
-                                            )}
-                                        </TableCell>
-                                        <TableCell className="text-muted-foreground hidden md:table-cell">
-                                            {new Date(user.created_at).toLocaleDateString('es-PE', {
-                                                year: 'numeric',
-                                                month: 'short',
-                                                day: 'numeric',
-                                            })}
-                                        </TableCell>
-                                        <TableCell>
-                                            <UsersActionDropdown userId={user.id} />
-                                        </TableCell>
-                                    </TableRow>
-                                ))
+                                            </TableCell>
+
+                                            {/* Estado */}
+                                            <TableCell>
+                                                {user.email_verified_at ? (
+                                                    <Badge className="bg-teal-100/30 text-teal-900 border-teal-200 dark:text-teal-200">
+                                                        Verificado
+                                                    </Badge>
+                                                ) : (
+                                                    <Badge className="bg-amber-100/30 text-amber-900 border-amber-200 dark:text-amber-200">
+                                                        Pendiente
+                                                    </Badge>
+                                                )}
+                                            </TableCell>
+
+                                            {/* Creado */}
+                                            <TableCell className="text-muted-foreground hidden md:table-cell text-xs">
+                                                {new Date(user.created_at).toLocaleDateString('es-PE', {
+                                                    year: 'numeric',
+                                                    month: 'short',
+                                                    day: 'numeric',
+                                                })}
+                                            </TableCell>
+
+                                            {/* Acciones */}
+                                            <TableCell className="text-right">
+                                                <UsersActionDropdown
+                                                    userId={user.id}
+                                                    onAssignRole={() => handleOpenAssignRole(user)}
+                                                />
+                                            </TableCell>
+                                        </TableRow>
+                                    );
+                                })
                             )}
                         </TableBody>
                     </Table>
@@ -218,6 +309,15 @@ export default function UsersIndex({ users, filters }: Props) {
                     filters={filters}
                     selectedCount={selectedIds.size}
                 />
+
+                {/* Modal de Asignación Rápida de Rol */}
+                <UserRoleDialog
+                    user={selectedUserForRole}
+                    roles={roles}
+                    externalCapabilities={external_capabilities}
+                    open={roleDialogOpen}
+                    onOpenChange={setRoleDialogOpen}
+                />
             </div>
         </>
     );
@@ -226,7 +326,7 @@ export default function UsersIndex({ users, filters }: Props) {
 UsersIndex.layout = {
     breadcrumbs: [
         {
-            title: 'Administracion',
+            title: 'Gestión de acceso',
             href: '#',
         },
         {

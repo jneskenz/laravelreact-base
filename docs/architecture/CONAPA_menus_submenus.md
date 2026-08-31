@@ -161,10 +161,9 @@ Accesible por usuarios internos: `super-admin`, `admin`, `content-admin`.
 
 | Submenú | Ruta esperada | `permission_required` |
 |---|---|---|
-| Usuarios internos | `/panel/usuarios?tipo=interno` | `usuarios.gestionar` |
-| Usuarios externos | `/panel/usuarios?tipo=externo` | `usuarios.gestionar` |
-| Roles y permisos | `/panel/usuarios/roles` | `roles.gestionar` |
-| Asignación de menús (la matriz Roles × Menús) | `/panel/usuarios/menus` | `roles.gestionar` |
+| Usuarios | `/panel/usuarios` | `usuarios.gestionar` |
+| Roles y permisos | `/panel/roles` | `roles.gestionar` |
+| Asignación de menús (la matriz Roles × Menús) | `/panel/menus` | `roles.gestionar` |
 | Equipos / territorios (Teams: distrito, provincia, región) | `/panel/usuarios/equipos` | `usuarios.gestionar` |
 
 ---
