@@ -34,7 +34,7 @@ Reglas para cualquier persona o agente (incluyendo asistentes de IA/MCP) que tra
 3. **El escalafón del voluntariado** (Distrital → Provincial → Regional → Embajador) se modela con **Spatie Teams** (equipos = distritos/regiones) + un campo de "rango" informativo, no con roles de permisos adicionales.
 4. **Menús dirigidos por configuración**, no hardcodeados por rol: un único registro de menú filtrado por permisos.
 5. **Módulos como paquetes independientes** (Casos, Albergues, Veterinaria, Voluntariado, Donaciones, Convenios, Contenidos): se activan/desactivan por instalación sin tocar código.
-6. **Rutas separadas por prefijo** (`/panel/...` interno, `/mi-cuenta/...` externo, raíz pública sin prefijo).
+6. **Rutas separadas por prefijo** (`/panel/...` interno, `/portal/...` externo, raíz pública sin prefijo).
 
 ---
 
@@ -198,7 +198,7 @@ Sembrar con un **seeder data-driven** (arreglo de configuración, no hardcodeado
 |---|---|---|
 | *(sin prefijo)* | Público general | `/`, `/proyectos`, `/convenios`, `/denuncias`, `/reconocimiento`, `/voluntarios`, `/contactanos`, `/donaciones` |
 | `/login`, `/registro` | Todos | Autenticación única, redirección según `tipo_usuario` |
-| `/mi-cuenta/...` | Externos | `/mi-cuenta/dashboard`, `/mi-cuenta/donaciones`, `/mi-cuenta/voluntariado`, `/mi-cuenta/convenio`, `/mi-cuenta/denuncias` |
+| `/portal/...` | Externos | `/portal/dashboard`, `/portal/donaciones`, `/portal/voluntariado`, `/portal/convenio`, `/portal/denuncias` |
 | `/panel/...` | Internos | `/panel/dashboard`, `/panel/casos`, `/panel/albergues`, `/panel/veterinaria`, `/panel/voluntariado`, `/panel/donaciones`, `/panel/contenidos`, `/panel/usuarios`, `/panel/configuracion`, `/panel/auditoria` |
 
 > **Nota sobre la integración Frontend/Backend:** No se utiliza una API REST independiente para el SPA. Toda la comunicación y transferencia de datos entre Laravel y React se gestiona mediante **Inertia.js** a través de controladores Inertia (`Inertia::render()`) y propiedades compartidas (`HandleInertiaRequests`).
@@ -214,7 +214,7 @@ Route::post('/denuncias', [DenunciaPublicaController::class, 'store']);
 Route::get('/voluntarios', [VoluntarioPublicoController::class, 'form']);
 
 // Portal externo
-Route::prefix('mi-cuenta')
+Route::prefix('portal')
     ->middleware(['auth', 'tipo.usuario:externo'])
     ->group(function () {
         Route::get('dashboard', [PortalController::class, 'index']);
@@ -268,7 +268,7 @@ El `super-admin` activa/desactiva módulos desde Configuración sin despliegue d
 
 ```
 Sitio publico -> Auth Gateway (1 guard, Sanctum)
-              -> Portal externo (/mi-cuenta) | Panel interno (/panel)
+              -> Portal externo (/portal) | Panel interno (/panel)
               -> Modulos compartidos (policies)
               -> Base de datos
 ```

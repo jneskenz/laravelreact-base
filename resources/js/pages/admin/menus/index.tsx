@@ -13,7 +13,7 @@ import {
     TableRow,
 } from '@/components/ui/table';
 import { resolveIcon } from '@/lib/icon-map';
-import { index } from '@/routes/admin/menus';
+import { index } from '@/routes/panel/menus';
 import { MenuActionDropdown } from './components/menu-action-dropdown';
 import { MenuCreateDialog, type ParentMenuRecord } from './components/menu-create-dialog';
 import { MenuEditDialog, type MenuItemRecord, type RoleRecord } from './components/menu-edit-dialog';

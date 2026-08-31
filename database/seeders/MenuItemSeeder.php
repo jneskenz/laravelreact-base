@@ -23,7 +23,7 @@ class MenuItemSeeder extends Seeder
             'key' => 'dashboard',
             'label' => 'Dashboard',
             'icon' => 'LayoutGrid',
-            'route' => 'dashboard',
+            'route' => 'panel.dashboard',
             'permission_required' => 'dashboard.ver',
             'area' => 'panel',
             'order' => 1,
@@ -183,9 +183,9 @@ class MenuItemSeeder extends Seeder
             'order' => 10,
         ]);
         $this->createChildren($contenidos, [
-            ['key' => 'contenidos.paginas', 'label' => 'Páginas institucionales', 'route' => 'cms.institucional', 'url' => '/panel/contenidos/paginas', 'permission_required' => 'contenidos.editar', 'module' => 'contenidos', 'order' => 1],
-            ['key' => 'contenidos.proyectos', 'label' => 'Proyectos', 'route' => 'cms.proyectos', 'url' => '/panel/contenidos/proyectos', 'permission_required' => 'contenidos.editar', 'module' => 'contenidos', 'order' => 2],
-            ['key' => 'contenidos.reconocimientos', 'label' => 'Reconocimientos y prensa', 'route' => 'cms.reconocimientos', 'url' => '/panel/contenidos/reconocimientos', 'permission_required' => 'contenidos.editar', 'module' => 'contenidos', 'order' => 3],
+            ['key' => 'contenidos.paginas', 'label' => 'Páginas institucionales', 'route' => 'panel.contenidos.institucional', 'url' => '/panel/contenidos/institucional', 'permission_required' => 'contenidos.editar', 'module' => 'contenidos', 'order' => 1],
+            ['key' => 'contenidos.proyectos', 'label' => 'Proyectos', 'route' => 'panel.contenidos.proyectos', 'url' => '/panel/contenidos/proyectos', 'permission_required' => 'contenidos.editar', 'module' => 'contenidos', 'order' => 2],
+            ['key' => 'contenidos.reconocimientos', 'label' => 'Reconocimientos y prensa', 'route' => 'panel.contenidos.reconocimientos', 'url' => '/panel/contenidos/reconocimientos', 'permission_required' => 'contenidos.editar', 'module' => 'contenidos', 'order' => 3],
             ['key' => 'contenidos.blog', 'label' => 'Blog / Noticias', 'url' => '/panel/contenidos/blog', 'permission_required' => 'contenidos.editar', 'module' => 'contenidos', 'order' => 4],
             ['key' => 'contenidos.multimedia', 'label' => 'Multimedia / Galería', 'url' => '/panel/contenidos/multimedia', 'permission_required' => 'contenidos.editar', 'module' => 'contenidos', 'order' => 5],
             ['key' => 'contenidos.banners', 'label' => 'Banners / Hero', 'url' => '/panel/contenidos/banners', 'permission_required' => 'contenidos.editar', 'module' => 'contenidos', 'order' => 6],
@@ -203,10 +203,10 @@ class MenuItemSeeder extends Seeder
             'order' => 11,
         ]);
         $this->createChildren($usuarios, [
-            ['key' => 'usuarios.internos', 'label' => 'Usuarios internos', 'route' => 'admin.users.index', 'url' => '/admin/users', 'permission_required' => 'usuarios.gestionar', 'order' => 1],
+            ['key' => 'usuarios.internos', 'label' => 'Usuarios internos', 'route' => 'panel.usuarios.index', 'url' => '/panel/usuarios', 'permission_required' => 'usuarios.gestionar', 'order' => 1],
             ['key' => 'usuarios.externos', 'label' => 'Usuarios externos', 'url' => '/panel/usuarios/externos', 'permission_required' => 'usuarios.gestionar', 'order' => 2],
             ['key' => 'usuarios.roles', 'label' => 'Roles y permisos', 'url' => '/panel/usuarios/roles', 'permission_required' => 'roles.gestionar', 'order' => 3],
-            ['key' => 'usuarios.menus', 'label' => 'Asignación de menús', 'route' => 'admin.menus.index', 'url' => '/admin/menus', 'permission_required' => 'roles.gestionar', 'order' => 4],
+            ['key' => 'usuarios.menus', 'label' => 'Asignación de menús', 'route' => 'panel.menus.index', 'url' => '/panel/menus', 'permission_required' => 'roles.gestionar', 'order' => 4],
         ]);
 
         // 12. Reportes
@@ -259,7 +259,7 @@ class MenuItemSeeder extends Seeder
         ]);
 
         // ---------------------------------------------------------------------
-        // PORTAL EXTERNO (/mi-cuenta/...) - area: 'portal'
+        // PORTAL EXTERNO (/portal/...) - area: 'portal'
         // ---------------------------------------------------------------------
 
         // 1. Dashboard Externo
@@ -267,7 +267,7 @@ class MenuItemSeeder extends Seeder
             'key' => 'mi.dashboard',
             'label' => 'Mi Panel',
             'icon' => 'LayoutGrid',
-            'route' => 'dashboard',
+            'route' => 'portal.dashboard',
             'area' => 'portal',
             'order' => 1,
         ]);
@@ -283,10 +283,10 @@ class MenuItemSeeder extends Seeder
             'order' => 2,
         ]);
         $this->createChildren($miVoluntariado, [
-            ['key' => 'mi.voluntariado.turnos', 'label' => 'Mis Turnos', 'url' => '/mi-cuenta/voluntariado/turnos', 'permission_required' => 'voluntariado.ver-turnos', 'module' => 'voluntariado', 'order' => 1],
-            ['key' => 'mi.voluntariado.escalafon', 'label' => 'Mi Rango y Escalafón', 'url' => '/mi-cuenta/voluntariado/escalafon', 'permission_required' => 'voluntariado.ver-propias', 'module' => 'voluntariado', 'order' => 2],
-            ['key' => 'mi.voluntariado.capacitaciones', 'label' => 'Mis Capacitaciones', 'url' => '/mi-cuenta/voluntariado/capacitaciones', 'permission_required' => 'voluntariado.ver-propias', 'module' => 'voluntariado', 'order' => 3],
-            ['key' => 'mi.voluntariado.equipo', 'label' => 'Mi Equipo', 'url' => '/mi-cuenta/voluntariado/equipo', 'permission_required' => 'voluntariado.gestionar-equipo', 'module' => 'voluntariado', 'order' => 4],
+            ['key' => 'mi.voluntariado.turnos', 'label' => 'Mis Turnos', 'url' => '/portal/voluntariado/turnos', 'permission_required' => 'voluntariado.ver-turnos', 'module' => 'voluntariado', 'order' => 1],
+            ['key' => 'mi.voluntariado.escalafon', 'label' => 'Mi Rango y Escalafón', 'url' => '/portal/voluntariado/escalafon', 'permission_required' => 'voluntariado.ver-propias', 'module' => 'voluntariado', 'order' => 2],
+            ['key' => 'mi.voluntariado.capacitaciones', 'label' => 'Mis Capacitaciones', 'url' => '/portal/voluntariado/capacitaciones', 'permission_required' => 'voluntariado.ver-propias', 'module' => 'voluntariado', 'order' => 3],
+            ['key' => 'mi.voluntariado.equipo', 'label' => 'Mi Equipo', 'url' => '/portal/voluntariado/equipo', 'permission_required' => 'voluntariado.gestionar-equipo', 'module' => 'voluntariado', 'order' => 4],
         ], 'portal');
 
         // 3. Mis Donaciones
@@ -300,10 +300,10 @@ class MenuItemSeeder extends Seeder
             'order' => 3,
         ]);
         $this->createChildren($miDonaciones, [
-            ['key' => 'mi.donaciones.historial', 'label' => 'Historial de Donaciones', 'url' => '/mi-cuenta/donaciones', 'permission_required' => 'donaciones.ver-propias', 'module' => 'donaciones', 'order' => 1],
-            ['key' => 'mi.donaciones.nueva', 'label' => 'Nueva Donación', 'url' => '/mi-cuenta/donaciones/crear', 'permission_required' => 'donaciones.registrar', 'module' => 'donaciones', 'order' => 2],
-            ['key' => 'mi.donaciones.apadrinamiento', 'label' => 'Mi Apadrinamiento', 'url' => '/mi-cuenta/donaciones/apadrinamiento', 'permission_required' => 'donaciones.ver-propias', 'module' => 'donaciones', 'order' => 3],
-            ['key' => 'mi.donaciones.certificados', 'label' => 'Mis Certificados', 'url' => '/mi-cuenta/donaciones/certificados', 'permission_required' => 'donaciones.ver-propias', 'module' => 'donaciones', 'order' => 4],
+            ['key' => 'mi.donaciones.historial', 'label' => 'Historial de Donaciones', 'url' => '/portal/donaciones', 'permission_required' => 'donaciones.ver-propias', 'module' => 'donaciones', 'order' => 1],
+            ['key' => 'mi.donaciones.nueva', 'label' => 'Nueva Donación', 'url' => '/portal/donaciones/crear', 'permission_required' => 'donaciones.registrar', 'module' => 'donaciones', 'order' => 2],
+            ['key' => 'mi.donaciones.apadrinamiento', 'label' => 'Mi Apadrinamiento', 'url' => '/portal/donaciones/apadrinamiento', 'permission_required' => 'donaciones.ver-propias', 'module' => 'donaciones', 'order' => 3],
+            ['key' => 'mi.donaciones.certificados', 'label' => 'Mis Certificados', 'url' => '/portal/donaciones/certificados', 'permission_required' => 'donaciones.ver-propias', 'module' => 'donaciones', 'order' => 4],
         ], 'portal');
 
         // 4. Mis Denuncias
@@ -317,8 +317,8 @@ class MenuItemSeeder extends Seeder
             'order' => 4,
         ]);
         $this->createChildren($miDenuncias, [
-            ['key' => 'mi.denuncias.lista', 'label' => 'Historial de Denuncias', 'url' => '/mi-cuenta/denuncias', 'permission_required' => 'casos.ver-propias', 'module' => 'casos', 'order' => 1],
-            ['key' => 'mi.denuncias.seguimiento', 'label' => 'Seguimiento por Código', 'url' => '/mi-cuenta/denuncias/seguimiento', 'permission_required' => 'casos.ver-propias', 'module' => 'casos', 'order' => 2],
+            ['key' => 'mi.denuncias.lista', 'label' => 'Historial de Denuncias', 'url' => '/portal/denuncias', 'permission_required' => 'casos.ver-propias', 'module' => 'casos', 'order' => 1],
+            ['key' => 'mi.denuncias.seguimiento', 'label' => 'Seguimiento por Código', 'url' => '/portal/denuncias/seguimiento', 'permission_required' => 'casos.ver-propias', 'module' => 'casos', 'order' => 2],
         ], 'portal');
 
         // 5. Mi Convenio
@@ -332,8 +332,8 @@ class MenuItemSeeder extends Seeder
             'order' => 5,
         ]);
         $this->createChildren($miConvenio, [
-            ['key' => 'mi.convenio.detalle', 'label' => 'Detalle del Convenio', 'url' => '/mi-cuenta/convenio', 'permission_required' => 'convenios.ver-propio', 'module' => 'convenios', 'order' => 1],
-            ['key' => 'mi.convenio.recursos', 'label' => 'Recursos Institucionales', 'url' => '/mi-cuenta/convenio/recursos', 'permission_required' => 'convenios.ver-propio', 'module' => 'convenios', 'order' => 2],
+            ['key' => 'mi.convenio.detalle', 'label' => 'Detalle del Convenio', 'url' => '/portal/convenio', 'permission_required' => 'convenios.ver-propio', 'module' => 'convenios', 'order' => 1],
+            ['key' => 'mi.convenio.recursos', 'label' => 'Recursos Institucionales', 'url' => '/portal/convenio/recursos', 'permission_required' => 'convenios.ver-propio', 'module' => 'convenios', 'order' => 2],
         ], 'portal');
 
         // 6. Mis Apadrinados (Beneficiarios)
@@ -342,7 +342,7 @@ class MenuItemSeeder extends Seeder
             'label' => 'Mis Apadrinados',
             'icon' => 'PawPrint',
             'module' => 'beneficiarios',
-            'url' => '/mi-cuenta/apadrinados',
+            'url' => '/portal/apadrinados',
             'permission_required' => 'beneficiarios.ver-propias',
             'area' => 'portal',
             'order' => 6,

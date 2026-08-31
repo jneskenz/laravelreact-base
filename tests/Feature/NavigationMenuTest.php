@@ -124,7 +124,7 @@ test('inertia response shares menu prop to authenticated user', function () {
     $user->assignRole('super-admin');
 
     $this->actingAs($user)
-        ->get(route('dashboard'))
+        ->get(route('panel.dashboard'))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component('dashboard')

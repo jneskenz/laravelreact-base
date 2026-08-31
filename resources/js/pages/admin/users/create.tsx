@@ -1,5 +1,5 @@
 import { Head } from '@inertiajs/react';
-import { create as createRoute, index, store } from '@/routes/admin/users';
+import { create as createRoute, index, store } from '@/routes/panel/usuarios';
 import { UserForm } from './components/user-form';
 
 export default function UsersCreate() {

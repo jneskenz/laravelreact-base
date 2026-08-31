@@ -13,7 +13,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { index } from '@/routes/admin/menus';
+import { index } from '@/routes/panel/menus';
 import type { MenuFilters } from './menus-toolbar';
 
 type PaginationMeta = {

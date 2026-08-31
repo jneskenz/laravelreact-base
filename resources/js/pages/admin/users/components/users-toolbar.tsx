@@ -10,7 +10,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { index } from '@/routes/admin/users';
+import { index } from '@/routes/panel/usuarios';
 
 type Filters = {
     search: string;

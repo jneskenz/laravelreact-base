@@ -13,7 +13,7 @@ import {
     SelectTrigger,
     SelectValue,
 } from '@/components/ui/select';
-import { index } from '@/routes/admin/users';
+import { index } from '@/routes/panel/usuarios';
 
 type PaginationMeta = {
     current_page: number;

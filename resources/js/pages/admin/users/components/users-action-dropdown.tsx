@@ -8,7 +8,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { destroy, edit } from '@/routes/admin/users';
+import { destroy, edit } from '@/routes/panel/usuarios';
 
 type Props = {
     userId: number;

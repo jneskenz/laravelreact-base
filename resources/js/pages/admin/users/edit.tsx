@@ -1,5 +1,5 @@
 import { Head } from '@inertiajs/react';
-import { edit as editRoute, index, update } from '@/routes/admin/users';
+import { edit as editRoute, index, update } from '@/routes/panel/usuarios';
 import { UserForm } from './components/user-form';
 
 type User = {

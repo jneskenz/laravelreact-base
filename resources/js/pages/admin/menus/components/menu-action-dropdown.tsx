@@ -9,7 +9,7 @@ import {
     DropdownMenuSeparator,
     DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { destroy, toggle } from '@/routes/admin/menus';
+import { destroy, toggle } from '@/routes/panel/menus';
 import type { MenuItemRecord } from './menu-edit-dialog';
 
 type Props = {

@@ -15,7 +15,7 @@ beforeEach(function () {
 });
 
 test('guests cannot access menu management page', function () {
-    $response = $this->get(route('admin.menus.index'));
+    $response = $this->get(route('panel.menus.index'));
     $response->assertRedirect(route('login'));
 });
 
@@ -24,7 +24,7 @@ test('super admin can visit menu management page and view menus list', function 
     $user->assignRole('super-admin');
 
     $this->actingAs($user)
-        ->get(route('admin.menus.index'))
+        ->get(route('panel.menus.index'))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component('admin/menus/index')
@@ -40,7 +40,7 @@ test('menus index supports search filtering', function () {
     $user->assignRole('super-admin');
 
     $this->actingAs($user)
-        ->get(route('admin.menus.index', ['search' => 'veterinaria']))
+        ->get(route('panel.menus.index', ['search' => 'veterinaria']))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component('admin/menus/index')
@@ -53,7 +53,7 @@ test('menus index supports area filtering', function () {
     $user->assignRole('super-admin');
 
     $this->actingAs($user)
-        ->get(route('admin.menus.index', ['area' => 'portal']))
+        ->get(route('panel.menus.index', ['area' => 'portal']))
         ->assertOk()
         ->assertInertia(fn (Assert $page) => $page
             ->component('admin/menus/index')
@@ -69,7 +69,7 @@ test('admin can toggle active status of a menu item', function () {
     $initialState = $menuItem->is_active;
 
     $this->actingAs($user)
-        ->patch(route('admin.menus.toggle', $menuItem))
+        ->patch(route('panel.menus.toggle', $menuItem))
         ->assertRedirect();
 
     expect($menuItem->fresh()->is_active)->toBe(! $initialState);
@@ -88,7 +88,7 @@ test('admin can update role access for a menu item', function () {
 
     // Grant access to content-admin and admin
     $this->actingAs($user)
-        ->put(route('admin.menus.update-roles', $menuItem), [
+        ->put(route('panel.menus.update-roles', $menuItem), [
             'roles' => ['admin', 'content-admin'],
         ])
         ->assertRedirect();
@@ -103,7 +103,7 @@ test('admin can update menu item details', function () {
     $menuItem = MenuItem::firstWhere('key', 'dashboard');
 
     $this->actingAs($user)
-        ->put(route('admin.menus.update', $menuItem), [
+        ->put(route('panel.menus.update', $menuItem), [
             'label' => 'Panel Principal',
             'icon' => 'LayoutGrid',
             'order' => 1,
@@ -120,7 +120,7 @@ test('admin can create a new menu item with role permissions', function () {
     $user->assignRole('super-admin');
 
     $this->actingAs($user)
-        ->post(route('admin.menus.store'), [
+        ->post(route('panel.menus.store'), [
             'key' => 'custom.reportes',
             'label' => 'Reportes Personalizados',
             'icon' => 'BarChart3',
@@ -155,7 +155,7 @@ test('admin can delete a menu item', function () {
     ]);
 
     $this->actingAs($user)
-        ->delete(route('admin.menus.destroy', $menuItem))
+        ->delete(route('panel.menus.destroy', $menuItem))
         ->assertRedirect();
 
     expect(MenuItem::firstWhere('key', 'temp.menu'))->toBeNull();

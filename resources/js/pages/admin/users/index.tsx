@@ -12,7 +12,7 @@ import {
     TableHeader,
     TableRow,
 } from '@/components/ui/table';
-import { create, index } from '@/routes/admin/users';
+import { create, index } from '@/routes/panel/usuarios';
 import { UsersActionDropdown } from './components/users-action-dropdown';
 import { UsersPagination } from './components/users-pagination';
 import { UsersToolbar } from './components/users-toolbar';

@@ -1,6 +1,6 @@
 import { Head } from '@inertiajs/react';
 import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
-import { proyectos } from '@/routes/cms';
+import { proyectos } from '@/routes/panel/contenidos';
 
 export default function Proyectos() {
     return (

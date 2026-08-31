@@ -15,7 +15,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { resolveIcon } from '@/lib/icon-map';
-import { update, updateRoles } from '@/routes/admin/menus';
+import { update, updateRoles } from '@/routes/panel/menus';
 
 export type MenuItemRecord = {
     id: number;

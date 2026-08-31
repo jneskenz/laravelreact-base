@@ -203,45 +203,45 @@ Accesible por usuarios internos: `super-admin`, `admin`, `content-admin`.
 
 ---
 
-## Portal Externo (`/mi-cuenta/...`)
+## Portal Externo (`/portal/...`)
 
-Accesible por usuarios externos: `donor`, `volunteer`, `partner`, `complainant`.
+Accesible por usuarios externos (`tipo_usuario = 'externo'`).
 
 ### Voluntariado (`volunteer`)
 
 | Submenú | Ruta esperada | `permission_required` |
 |---|---|---|
-| Mi Perfil | `/mi-cuenta/perfil` | `voluntariado.ver-propias` |
-| Mis Asignaciones / Turnos | `/mi-cuenta/voluntariado/turnos` | `voluntariado.ver-propias` |
-| Mi Rango / Escalafón | `/mi-cuenta/voluntariado/escalafon` | `voluntariado.ver-propias` |
-| Capacitaciones y Certificados | `/mi-cuenta/voluntariado/capacitaciones` | `voluntariado.ver-propias` |
-| Bolsa Nacional de Trabajo **[F2]** | `/mi-cuenta/voluntariado/bolsa-trabajo` | `voluntariado.ver-propias` |
-| Mi Equipo (solo si es coordinador) | `/mi-cuenta/voluntariado/equipo` | `voluntariado.gestionar-equipo` |
+| Mi Perfil | `/portal/perfil` | `voluntariado.ver-propias` |
+| Mis Asignaciones / Turnos | `/portal/voluntariado/turnos` | `voluntariado.ver-propias` |
+| Mi Rango / Escalafón | `/portal/voluntariado/escalafon` | `voluntariado.ver-propias` |
+| Capacitaciones y Certificados | `/portal/voluntariado/capacitaciones` | `voluntariado.ver-propias` |
+| Bolsa Nacional de Trabajo **[F2]** | `/portal/voluntariado/bolsa-trabajo` | `voluntariado.ver-propias` |
+| Mi Equipo (solo si es coordinador) | `/portal/voluntariado/equipo` | `voluntariado.gestionar-equipo` |
 
 ### Donador (`donor`)
 
 | Submenú | Ruta esperada | `permission_required` |
 |---|---|---|
-| Mi Perfil | `/mi-cuenta/perfil` | `donaciones.ver-propias` |
-| Mis Donaciones | `/mi-cuenta/donaciones` | `donaciones.ver-propias` |
-| Nueva Donación | `/mi-cuenta/donaciones/crear` | `donaciones.registrar` |
-| Apadrinamiento | `/mi-cuenta/donaciones/apadrinamiento` | `donaciones.ver-propias` |
-| Certificado de donación | `/mi-cuenta/donaciones/certificados` | `donaciones.ver-propias` |
+| Mi Perfil | `/portal/perfil` | `donaciones.ver-propias` |
+| Mis Donaciones | `/portal/donaciones` | `donaciones.ver-propias` |
+| Nueva Donación | `/portal/donaciones/crear` | `donaciones.registrar` |
+| Apadrinamiento | `/portal/donaciones/apadrinamiento` | `donaciones.ver-propias` |
+| Certificado de donación | `/portal/donaciones/certificados` | `donaciones.ver-propias` |
 
 ### Socio (`partner`)
 
 | Submenú | Ruta esperada | `permission_required` |
 |---|---|---|
-| Mi Perfil | `/mi-cuenta/perfil` | `convenios.ver-propio` |
-| Mi Convenio | `/mi-cuenta/convenio` | `convenios.ver-propio` |
-| Recursos institucionales | `/mi-cuenta/convenio/recursos` | `convenios.ver-propio` |
+| Mi Perfil | `/portal/perfil` | `convenios.ver-propio` |
+| Mi Convenio | `/portal/convenio` | `convenios.ver-propio` |
+| Recursos institucionales | `/portal/convenio/recursos` | `convenios.ver-propio` |
 
 ### Denunciante (`complainant`)
 
 | Submenú | Ruta esperada | `permission_required` |
 |---|---|---|
-| Mis Denuncias | `/mi-cuenta/denuncias` | `casos.ver-propias` |
-| Seguimiento de mi Denuncia | `/mi-cuenta/denuncias/{codigo}` | `casos.ver-propias` |
+| Mis Denuncias | `/portal/denuncias` | `casos.ver-propias` |
+| Seguimiento de mi Denuncia | `/portal/denuncias/{codigo}` | `casos.ver-propias` |
 
 > **Nota:** El denunciante también puede crear una denuncia **sin cuenta** desde el sitio público (ver sección siguiente).
 

@@ -21,7 +21,7 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { resolveIcon } from '@/lib/icon-map';
-import { store } from '@/routes/admin/menus';
+import { store } from '@/routes/panel/menus';
 import type { RoleRecord } from './menu-edit-dialog';
 
 export type ParentMenuRecord = {
@@ -202,7 +202,7 @@ export function MenuCreateDialog({ roles, modules, parentMenus, open, onOpenChan
                                     </SelectTrigger>
                                     <SelectContent>
                                         <SelectItem value="panel">Panel Interno (/panel)</SelectItem>
-                                        <SelectItem value="portal">Portal Externo (/mi-cuenta)</SelectItem>
+                                        <SelectItem value="portal">Portal Externo (/portal)</SelectItem>
                                     </SelectContent>
                                 </Select>
                             </div>

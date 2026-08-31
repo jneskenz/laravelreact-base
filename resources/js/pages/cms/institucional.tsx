@@ -1,6 +1,6 @@
 import { Head } from '@inertiajs/react';
 import { PlaceholderPattern } from '@/components/ui/placeholder-pattern';
-import { institucional } from '@/routes/cms';
+import { institucional } from '@/routes/panel/contenidos';
 
 export default function Institucional() {
     return (
