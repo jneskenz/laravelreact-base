@@ -15,12 +15,20 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        User::factory(30)->create();
-        User::factory(20)->unverified()->create();
+        $this->call([
+            RoleAndPermissionSeeder::class,
+            MenuItemSeeder::class,
+        ]);
 
-        User::factory()->create([
+        User::factory(10)->interno()->create();
+        User::factory(20)->externo()->create();
+        User::factory(10)->unverified()->create();
+
+        $testUser = User::factory()->create([
             'name' => 'Test User',
             'email' => 'test@example.com',
+            'tipo_usuario' => 'interno',
         ]);
+        $testUser->assignRole('super-admin');
     }
 }

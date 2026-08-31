@@ -27,6 +27,7 @@ class UserFactory extends Factory
         return [
             'name' => fake()->name(),
             'email' => fake()->unique()->safeEmail(),
+            'tipo_usuario' => 'externo',
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
@@ -34,6 +35,26 @@ class UserFactory extends Factory
             'two_factor_recovery_codes' => null,
             'two_factor_confirmed_at' => null,
         ];
+    }
+
+    /**
+     * Indicate that the user is internal.
+     */
+    public function interno(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'tipo_usuario' => 'interno',
+        ]);
+    }
+
+    /**
+     * Indicate that the user is external.
+     */
+    public function externo(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'tipo_usuario' => 'externo',
+        ]);
     }
 
     /**

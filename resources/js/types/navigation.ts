@@ -13,3 +13,12 @@ export type NavItem = {
     isActive?: boolean;
     items?: NavItem[];
 };
+
+export type MenuItemData = {
+    id: number;
+    key: string;
+    label: string;
+    icon: string | null;
+    url: string | null;
+    children?: MenuItemData[];
+};

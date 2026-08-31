@@ -90,7 +90,7 @@ Reglas para cualquier persona o agente (incluyendo asistentes de IA/MCP) que tra
 
 ### 2.1 Mapa de módulos del panel interno
 
-`Dashboard · Casos/Denuncias · Rescates · Beneficiarios (animales) · Albergues · Veterinaria · Voluntariado · Donaciones · Convenios · Contenidos Web (CMS) · Usuarios y Roles · Reportes · Configuración · Auditoría`
+`Dashboard · Casos/Denuncias · Rescates · Beneficiarios (animales) · Albergues · Veterinaria · Voluntariado · Donaciones · Convenios · Contenidos Web (CMS) · Gestión de acceso · Reportes · Configuración · Auditoría`
 
 El menú real de cada usuario es un **subconjunto filtrado por permisos** de este mapa (ver sección 6.1).
 
@@ -98,7 +98,7 @@ El menú real de cada usuario es un **subconjunto filtrado por permisos** de est
 - Dashboard ejecutivo
 - Casos/Denuncias · Rescates · Beneficiarios · Albergues · Veterinaria · Voluntariado · Donaciones · Convenios
 - Contenidos Web
-- **Usuarios y Roles**
+- **Gestión de acceso** (Usuarios, Roles y Permisos)
 - Reportes (todos)
 - **Configuración del sistema**
 - **Auditoría** (log completo)
@@ -200,7 +200,8 @@ Sembrar con un **seeder data-driven** (arreglo de configuración, no hardcodeado
 | `/login`, `/registro` | Todos | Autenticación única, redirección según `tipo_usuario` |
 | `/mi-cuenta/...` | Externos | `/mi-cuenta/dashboard`, `/mi-cuenta/donaciones`, `/mi-cuenta/voluntariado`, `/mi-cuenta/convenio`, `/mi-cuenta/denuncias` |
 | `/panel/...` | Internos | `/panel/dashboard`, `/panel/casos`, `/panel/albergues`, `/panel/veterinaria`, `/panel/voluntariado`, `/panel/donaciones`, `/panel/contenidos`, `/panel/usuarios`, `/panel/configuracion`, `/panel/auditoria` |
-| `/api/v1/...` | Consumido por el SPA en React | `/api/v1/panel/casos`, `/api/v1/portal/donaciones` |
+
+> **Nota sobre la integración Frontend/Backend:** No se utiliza una API REST independiente para el SPA. Toda la comunicación y transferencia de datos entre Laravel y React se gestiona mediante **Inertia.js** a través de controladores Inertia (`Inertia::render()`) y propiedades compartidas (`HandleInertiaRequests`).
 
 ### 5.2 Ejemplo de definición de rutas
 
@@ -244,7 +245,7 @@ Route::prefix('panel')
 
 Registro único (tabla `menu_items`): `key · label · icon · route · permission_required · parent_id · order`.
 
-El backend expone `GET /api/v1/me/menu`, filtrando por `$user->can(...)`. El React consume el árbol ya filtrado — cero lógica de roles en el frontend.
+El backend inyecta el menú como una propiedad compartida de Inertia (`HandleInertiaRequests::share()`), filtrando en servidor por `$user->can(...)` y módulos activos. React consume directamente la prop `menu` ya filtrada — cero lógica de roles o llamadas fetch en el frontend.
 
 ### 6.2 Registro de módulos (multi-ONG)
 
@@ -287,7 +288,7 @@ Sitio publico -> Auth Gateway (1 guard, Sanctum)
 | Donaciones | Total | Gestión | — | — | Propias | — | — |
 | Convenios | Total | Gestión | Lectura | — | — | Propio | — |
 | Contenidos Web | Total | Gestión | Gestión | — | — | — | — |
-| Usuarios y Roles | Total | Gestión limitada | — | — | — | — | — |
+| Gestión de acceso | Total | Gestión limitada | — | — | — | — | — |
 | Reportes | Total | Gestión | Lectura | — | — | — | — |
 | Configuración | Total | — | — | — | — | — | — |
 | Auditoría | Total | Lectura | — | — | — | — | — |
@@ -310,7 +311,7 @@ Sitio publico -> Auth Gateway (1 guard, Sanctum)
 
 1. Modelar tablas base: `users` (+`tipo_usuario`), roles/permisos (Spatie), teams.
 2. Sembrar roles y permisos con seeder data-driven.
-3. Construir el registro de menú + endpoint `GET /api/v1/me/menu`.
+3. Construir el registro de menú e integrarlo en `HandleInertiaRequests` (shared props).
 4. Implementar middleware `tipo.usuario` + middleware `permission` de Spatie.
 5. Definir policies por módulo (empezando por Casos y Donaciones).
 6. Configurar Activitylog en modelos críticos y construir pantalla de Auditoría.
