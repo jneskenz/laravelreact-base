@@ -236,10 +236,11 @@ class MenuItemSeeder extends Seeder
         ]);
         $this->createChildren($configuracion, [
             ['key' => 'configuracion.organizacion', 'label' => 'Datos de la organización', 'url' => '/panel/configuracion/organizacion', 'permission_required' => 'configuracion.editar', 'order' => 1],
-            ['key' => 'configuracion.modulos', 'label' => 'Módulos activos', 'url' => '/panel/configuracion/modulos', 'permission_required' => 'configuracion.editar', 'order' => 2],
-            ['key' => 'configuracion.parametros', 'label' => 'Parámetros generales', 'url' => '/panel/configuracion/parametros', 'permission_required' => 'configuracion.editar', 'order' => 3],
-            ['key' => 'configuracion.notificaciones', 'label' => 'Plantillas de notificaciones', 'url' => '/panel/configuracion/notificaciones', 'permission_required' => 'configuracion.editar', 'order' => 4],
-            ['key' => 'configuracion.integraciones', 'label' => 'Integraciones y pasarelas', 'url' => '/panel/configuracion/integraciones', 'permission_required' => 'configuracion.editar', 'order' => 5],
+            ['key' => 'configuracion.personalizacion', 'label' => 'Personalización y Apariencia', 'url' => '/panel/configuracion/personalizacion', 'permission_required' => 'configuracion.editar', 'order' => 2],
+            ['key' => 'configuracion.modulos', 'label' => 'Módulos activos', 'url' => '/panel/configuracion/modulos', 'permission_required' => 'configuracion.editar', 'order' => 3],
+            ['key' => 'configuracion.parametros', 'label' => 'Parámetros generales', 'url' => '/panel/configuracion/parametros', 'permission_required' => 'configuracion.editar', 'order' => 4],
+            ['key' => 'configuracion.notificaciones', 'label' => 'Plantillas de notificaciones', 'url' => '/panel/configuracion/notificaciones', 'permission_required' => 'configuracion.editar', 'order' => 5],
+            ['key' => 'configuracion.integraciones', 'label' => 'Integraciones y pasarelas', 'url' => '/panel/configuracion/integraciones', 'permission_required' => 'configuracion.editar', 'order' => 6],
         ]);
 
         // 14. Auditoría

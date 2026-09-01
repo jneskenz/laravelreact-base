@@ -27,6 +27,7 @@ export default function Login({ status, canResetPassword }: Props) {
             <Form
                 {...store.form()}
                 resetOnSuccess={['password']}
+                onSubmit={() => sessionStorage.setItem('pending_theme_sync', 'true')}
                 className="flex flex-col gap-6"
             >
                 {({ processing, errors }) => (

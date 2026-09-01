@@ -18,6 +18,7 @@ class DatabaseSeeder extends Seeder
         $this->call([
             RoleAndPermissionSeeder::class,
             MenuItemSeeder::class,
+            ThemeSeeder::class,
         ]);
 
         User::factory(10)->interno()->create();

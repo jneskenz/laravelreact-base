@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\MenuManagementController;
 use App\Http\Controllers\Admin\RoleController;
+use App\Http\Controllers\Admin\ThemeManagementController;
 use App\Http\Controllers\Admin\UserController;
 use Illuminate\Support\Facades\Route;
 
@@ -28,5 +29,11 @@ Route::middleware(['auth', 'verified'])->prefix('panel')->name('panel.')->group(
         Route::inertia('institucional', 'cms/institucional')->name('institucional');
         Route::inertia('proyectos', 'cms/proyectos')->name('proyectos');
         Route::inertia('reconocimientos', 'cms/reconocimientos')->name('reconocimientos');
+    });
+
+    // Configuración - Personalización y Apariencia
+    Route::prefix('configuracion')->name('configuracion.')->group(function () {
+        Route::patch('personalizacion/{theme}/default', [ThemeManagementController::class, 'setDefault'])->name('personalizacion.default');
+        Route::resource('personalizacion', ThemeManagementController::class)->names('personalizacion');
     });
 });

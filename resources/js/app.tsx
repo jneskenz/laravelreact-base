@@ -36,5 +36,5 @@ createInertiaApp({
     },
 });
 
-// This will set light / dark mode on load...
+// This will set light / dark / eye-care / semi-dark mode on load...
 initializeTheme();
