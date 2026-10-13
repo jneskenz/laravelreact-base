@@ -1,24 +1,26 @@
 import { Head, Link, router } from '@inertiajs/react';
 import {
-    Plus,
-    Star,
-    MoreHorizontal,
+    Copy,
+    Info,
+    Palette,
     Pencil,
-    Trash2,
+    Plus,
     Shield,
+    Star,
+    Trash2,
 } from 'lucide-react';
 import { useState } from 'react';
 import Heading from '@/components/heading';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import {
-    DropdownMenu,
-    DropdownMenuContent,
-    DropdownMenuItem,
-    DropdownMenuSeparator,
-    DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
+    Card,
+    CardContent,
+    CardDescription,
+    CardFooter,
+    CardHeader,
+    CardTitle,
+} from '@/components/ui/card';
 import {
     Dialog,
     DialogContent,
@@ -28,6 +30,16 @@ import {
     DialogTitle,
 } from '@/components/ui/dialog';
 import type { DbTheme } from '@/hooks/use-appearance';
+import { dashboard } from '@/routes/panel';
+import {
+    create,
+    defaultMethod,
+    destroy,
+    edit,
+    index,
+} from '@/routes/panel/configuracion/personalizacion';
+import { ThemePreview } from './components/theme-preview';
+import { THEME_MODES } from './components/theme-utils';
 
 interface Props {
     themes: DbTheme[];
@@ -35,212 +47,167 @@ interface Props {
 
 export default function ThemeManagementIndex({ themes }: Props) {
     const [themeToDelete, setThemeToDelete] = useState<DbTheme | null>(null);
+    const [themeToMakeDefault, setThemeToMakeDefault] =
+        useState<DbTheme | null>(null);
+    const [isProcessing, setIsProcessing] = useState(false);
 
-    function handleSetDefault(theme: DbTheme) {
-        router.patch(`/panel/configuracion/personalizacion/${theme.id}/default`, {}, {
+    function confirmSetDefault() {
+        if (!themeToMakeDefault) {
+            return;
+        }
+
+        router.visit(defaultMethod(themeToMakeDefault.id), {
             preserveScroll: true,
+            onStart: () => setIsProcessing(true),
+            onFinish: () => {
+                setIsProcessing(false);
+                setThemeToMakeDefault(null);
+            },
         });
     }
 
-    function handleDeleteConfirm() {
-        if (!themeToDelete) return;
-        router.delete(`/panel/configuracion/personalizacion/${themeToDelete.id}`, {
+    function confirmDelete() {
+        if (!themeToDelete) {
+            return;
+        }
+
+        router.visit(destroy(themeToDelete.id), {
             preserveScroll: true,
-            onFinish: () => setThemeToDelete(null),
+            onStart: () => setIsProcessing(true),
+            onFinish: () => {
+                setIsProcessing(false);
+                setThemeToDelete(null);
+            },
         });
     }
 
     return (
         <>
-            <Head title="Personalización y Apariencia - Panel" />
+            <Head title="Personalización" />
 
             <div className="space-y-6">
-                {/* Header */}
-                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-                    <div>
-                        <Heading
-                            title="Personalización y Apariencia"
-                            description="Administra los temas oficiales, paletas de colores semánticos y estilos visuales de la organización."
-                        />
-                    </div>
+                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+                    <Heading
+                        title="Personalización"
+                        description="Temas de color de la organización. Elige cuál se usa por defecto o crea uno nuevo."
+                    />
 
-                    <Button asChild className="gap-2 shrink-0">
-                        <Link href="/panel/configuracion/personalizacion/create">
+                    <Button asChild className="shrink-0 gap-2">
+                        <Link href={create()}>
                             <Plus className="size-4" />
-                            Nuevo Tema Institucional
+                            Nuevo tema
                         </Link>
                     </Button>
                 </div>
 
-                {/* Grid de Temas */}
-                <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
-                    {themes.map((theme) => {
-                        const lightColors = theme.modes_config?.light;
-                        const darkColors = theme.modes_config?.dark;
-                        const eyeCareColors = theme.modes_config?.eye_care;
-                        const semiDarkColors = theme.modes_config?.semi_dark;
-
-                        return (
-                            <Card
-                                key={theme.id}
-                                className={`relative flex flex-col justify-between transition-all hover:shadow-md ${
-                                    theme.is_default
-                                        ? 'border-primary shadow-xs ring-1 ring-primary/30'
-                                        : 'hover:border-border'
-                                }`}
-                            >
-                                <CardHeader className="pb-3">
-                                    <div className="flex items-start justify-between gap-2">
-                                        <div className="space-y-1">
-                                            <div className="flex items-center gap-2 flex-wrap">
-                                                <span
-                                                    className="size-3.5 rounded-full border shadow-2xs shrink-0"
-                                                    style={{ backgroundColor: theme.color }}
-                                                />
-                                                <CardTitle className="text-base font-bold">
-                                                    {theme.name}
-                                                </CardTitle>
-                                            </div>
-                                            <CardDescription className="text-xs line-clamp-2">
-                                                {theme.description || 'Sin descripción personalizada.'}
-                                            </CardDescription>
-                                        </div>
-
-                                        {/* Dropdown de Acciones */}
-                                        <DropdownMenu>
-                                            <DropdownMenuTrigger asChild>
-                                                <Button variant="ghost" size="icon" className="size-8 shrink-0">
-                                                    <MoreHorizontal className="size-4" />
-                                                </Button>
-                                            </DropdownMenuTrigger>
-                                            <DropdownMenuContent align="end" className="w-48">
-                                                {!theme.is_default && (
-                                                    <DropdownMenuItem onClick={() => handleSetDefault(theme)}>
-                                                        <Star className="mr-2 size-4 text-amber-500" />
-                                                        Hacer por defecto
-                                                    </DropdownMenuItem>
-                                                )}
-                                                <DropdownMenuItem asChild>
-                                                    <Link href={`/panel/configuracion/personalizacion/${theme.id}/edit`}>
-                                                        <Pencil className="mr-2 size-4" />
-                                                        Editar Tema
-                                                    </Link>
-                                                </DropdownMenuItem>
-                                                {!theme.is_system && !theme.is_default && (
-                                                    <>
-                                                        <DropdownMenuSeparator />
-                                                        <DropdownMenuItem
-                                                            onClick={() => setThemeToDelete(theme)}
-                                                            className="text-destructive focus:text-destructive"
-                                                        >
-                                                            <Trash2 className="mr-2 size-4" />
-                                                            Eliminar
-                                                        </DropdownMenuItem>
-                                                    </>
-                                                )}
-                                            </DropdownMenuContent>
-                                        </DropdownMenu>
-                                    </div>
-
-                                    {/* Badges de Estado */}
-                                    <div className="flex items-center gap-1.5 pt-2 flex-wrap">
-                                        {theme.is_default && (
-                                            <Badge variant="default" className="text-[10px] gap-1 px-2 py-0">
-                                                <Star className="size-2.5 fill-current" />
-                                                Por Defecto
-                                            </Badge>
-                                        )}
-                                        {theme.is_system ? (
-                                            <Badge variant="secondary" className="text-[10px] gap-1 px-2 py-0">
-                                                <Shield className="size-2.5" />
-                                                Sistema
-                                            </Badge>
-                                        ) : (
-                                            <Badge variant="outline" className="text-[10px] px-2 py-0">
-                                                Personalizado
-                                            </Badge>
-                                        )}
-                                        <Badge variant="outline" className="text-[10px] font-mono px-2 py-0">
-                                            Radio: {theme.radius || '0.625rem'}
-                                        </Badge>
-                                    </div>
-                                </CardHeader>
-
-                                <CardContent className="space-y-3 pt-0">
-                                    {/* Muestrario de los 9 Colores Semánticos (Modo Claro) */}
-                                    <div className="space-y-1.5 rounded-lg bg-muted/40 p-2.5 border">
-                                        <div className="flex items-center justify-between text-[11px] text-muted-foreground font-medium">
-                                            <span>Paleta Semántica (Modo Claro)</span>
-                                            <span className="text-[10px] opacity-70">9 Colores</span>
-                                        </div>
-                                        <div className="grid grid-cols-9 gap-1 pt-1">
-                                            {[
-                                                { label: 'Primary', color: lightColors?.primary || theme.color },
-                                                { label: 'Secondary', color: lightColors?.secondary || '#64748b' },
-                                                { label: 'Success', color: lightColors?.success || '#10b981' },
-                                                { label: 'Warning', color: lightColors?.warning || '#f59e0b' },
-                                                { label: 'Danger', color: lightColors?.danger || '#ef4444' },
-                                                { label: 'Alert', color: lightColors?.alert || '#f97316' },
-                                                { label: 'Muted', color: lightColors?.muted || '#64748b' },
-                                                { label: 'Light', color: lightColors?.light || '#ffffff' },
-                                                { label: 'Dark', color: lightColors?.dark || '#0f172a' },
-                                            ].map((swatch, idx) => (
-                                                <div key={idx} className="flex flex-col items-center gap-0.5">
-                                                    <span
-                                                        className="size-5 rounded border shadow-2xs"
-                                                        style={{ backgroundColor: swatch.color }}
-                                                        title={`${swatch.label}: ${swatch.color}`}
-                                                    />
-                                                    <span className="text-[8px] text-muted-foreground truncate w-full text-center">
-                                                        {swatch.label.slice(0, 3)}
-                                                    </span>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </div>
-
-                                    {/* Mini Previews de los 4 Modos Visuales */}
-                                    <div className="flex items-center justify-between gap-1 text-[10px] text-muted-foreground pt-1">
-                                        <div className="flex items-center gap-1.5">
-                                            <span className="size-2 rounded-full" style={{ backgroundColor: lightColors?.primary || theme.color }} />
-                                            <span>☀️ Claro</span>
-                                        </div>
-                                        <div className="flex items-center gap-1.5">
-                                            <span className="size-2 rounded-full" style={{ backgroundColor: darkColors?.primary || theme.color }} />
-                                            <span>🌙 Oscuro</span>
-                                        </div>
-                                        <div className="flex items-center gap-1.5">
-                                            <span className="size-2 rounded-full" style={{ backgroundColor: eyeCareColors?.primary || theme.color }} />
-                                            <span>👓 Vista</span>
-                                        </div>
-                                        <div className="flex items-center gap-1.5">
-                                            <span className="size-2 rounded-full" style={{ backgroundColor: semiDarkColors?.primary || theme.color }} />
-                                            <span>🌌 Dim</span>
-                                        </div>
-                                    </div>
-                                </CardContent>
-                            </Card>
-                        );
-                    })}
+                <div className="flex items-start gap-2 rounded-lg border bg-muted/40 p-3 text-xs text-muted-foreground">
+                    <Info className="mt-0.5 size-4 shrink-0" />
+                    <p>
+                        El tema{' '}
+                        <strong className="text-foreground">por defecto</strong>{' '}
+                        se aplica a todos los usuarios que no hayan elegido uno
+                        propio en <em>Ajustes › Apariencia</em>. Cada tema
+                        incluye cuatro modos:{' '}
+                        {THEME_MODES.map((mode) =>
+                            mode.label.toLowerCase(),
+                        ).join(', ')}
+                        .
+                    </p>
                 </div>
+
+                {themes.length === 0 ? (
+                    <div className="flex flex-col items-center gap-3 rounded-xl border border-dashed p-10 text-center">
+                        <Palette className="size-8 text-muted-foreground" />
+                        <div>
+                            <p className="font-medium">Todavía no hay temas</p>
+                            <p className="text-sm text-muted-foreground">
+                                Crea el primero o ejecuta{' '}
+                                <code>
+                                    php artisan db:seed --class=ThemeSeeder
+                                </code>
+                                .
+                            </p>
+                        </div>
+                        <Button asChild size="sm">
+                            <Link href={create()}>Crear tema</Link>
+                        </Button>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 gap-5 md:grid-cols-2 xl:grid-cols-3">
+                        {themes.map((theme) => (
+                            <ThemeCard
+                                key={theme.id}
+                                theme={theme}
+                                onMakeDefault={() =>
+                                    setThemeToMakeDefault(theme)
+                                }
+                                onDelete={() => setThemeToDelete(theme)}
+                            />
+                        ))}
+                    </div>
+                )}
             </div>
 
-            {/* Modal de Confirmación de Eliminación */}
-            <Dialog open={!!themeToDelete} onOpenChange={(open: boolean) => !open && setThemeToDelete(null)}>
+            <Dialog
+                open={!!themeToMakeDefault}
+                onOpenChange={(open) => !open && setThemeToMakeDefault(null)}
+            >
                 <DialogContent>
                     <DialogHeader>
-                        <DialogTitle>¿Eliminar tema institucional?</DialogTitle>
+                        <DialogTitle>
+                            ¿Usar "{themeToMakeDefault?.name}" por defecto?
+                        </DialogTitle>
                         <DialogDescription>
-                            Esta acción eliminará el tema &quot;{themeToDelete?.name}&quot; permanentemente.
-                            Los usuarios que lo tenían asignado volverán al tema por defecto del sistema.
+                            Todos los usuarios que no hayan elegido un tema
+                            propio verán este tema en su próxima navegación.
+                            Quienes ya eligieron uno lo conservan.
                         </DialogDescription>
                     </DialogHeader>
                     <DialogFooter>
-                        <Button variant="outline" onClick={() => setThemeToDelete(null)}>
+                        <Button
+                            variant="outline"
+                            onClick={() => setThemeToMakeDefault(null)}
+                        >
                             Cancelar
                         </Button>
-                        <Button variant="destructive" onClick={handleDeleteConfirm}>
-                            Eliminar Tema
+                        <Button
+                            onClick={confirmSetDefault}
+                            disabled={isProcessing}
+                        >
+                            Usar por defecto
+                        </Button>
+                    </DialogFooter>
+                </DialogContent>
+            </Dialog>
+
+            <Dialog
+                open={!!themeToDelete}
+                onOpenChange={(open) => !open && setThemeToDelete(null)}
+            >
+                <DialogContent>
+                    <DialogHeader>
+                        <DialogTitle>
+                            ¿Eliminar "{themeToDelete?.name}"?
+                        </DialogTitle>
+                        <DialogDescription>
+                            Esta acción no se puede deshacer. Los usuarios que
+                            lo tenían elegido pasarán a usar el tema por
+                            defecto.
+                        </DialogDescription>
+                    </DialogHeader>
+                    <DialogFooter>
+                        <Button
+                            variant="outline"
+                            onClick={() => setThemeToDelete(null)}
+                        >
+                            Cancelar
+                        </Button>
+                        <Button
+                            variant="destructive"
+                            onClick={confirmDelete}
+                            disabled={isProcessing}
+                        >
+                            Eliminar tema
                         </Button>
                     </DialogFooter>
                 </DialogContent>
@@ -249,19 +216,121 @@ export default function ThemeManagementIndex({ themes }: Props) {
     );
 }
 
+interface ThemeCardProps {
+    theme: DbTheme;
+    onMakeDefault: () => void;
+    onDelete: () => void;
+}
+
+function ThemeCard({ theme, onMakeDefault, onDelete }: ThemeCardProps) {
+    const canDelete = !theme.is_system && !theme.is_default;
+
+    return (
+        <Card
+            className={`flex flex-col ${theme.is_default ? 'border-primary ring-1 ring-primary/30' : ''}`}
+        >
+            <CardHeader className="space-y-2 pb-3">
+                <div className="flex items-center gap-2">
+                    <span
+                        className="size-3.5 shrink-0 rounded-full border"
+                        style={{ backgroundColor: theme.color }}
+                    />
+                    <CardTitle className="truncate text-base">
+                        {theme.name}
+                    </CardTitle>
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                    {theme.is_default && (
+                        <Badge className="gap-1">
+                            <Star className="size-3 fill-current" />
+                            Por defecto
+                        </Badge>
+                    )}
+                    {theme.is_system ? (
+                        <Badge variant="secondary" className="gap-1">
+                            <Shield className="size-3" />
+                            Sistema
+                        </Badge>
+                    ) : (
+                        <Badge variant="outline">Personalizado</Badge>
+                    )}
+                </div>
+                <CardDescription className="line-clamp-2 text-xs">
+                    {theme.description || 'Sin descripción.'}
+                </CardDescription>
+            </CardHeader>
+
+            <CardContent className="flex-1 space-y-2">
+                <div className="grid grid-cols-2 gap-2">
+                    <ThemePreview
+                        colors={theme.modes_config.light}
+                        radius={theme.radius}
+                        title={theme.name}
+                        compact
+                    />
+                    <ThemePreview
+                        colors={theme.modes_config.dark}
+                        radius={theme.radius}
+                        title={theme.name}
+                        compact
+                    />
+                </div>
+                <p className="text-center text-[11px] text-muted-foreground">
+                    Modo claro · Modo oscuro
+                </p>
+            </CardContent>
+
+            <CardFooter className="flex flex-wrap items-center gap-2 border-t pt-4">
+                <Button size="sm" variant="outline" asChild className="gap-1.5">
+                    <Link href={edit(theme.id)}>
+                        <Pencil className="size-3.5" />
+                        Editar
+                    </Link>
+                </Button>
+
+                {!theme.is_default && (
+                    <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={onMakeDefault}
+                        className="gap-1.5"
+                    >
+                        <Star className="size-3.5 text-amber-500" />
+                        Por defecto
+                    </Button>
+                )}
+
+                <Button size="sm" variant="ghost" asChild className="gap-1.5">
+                    <Link
+                        href={create({ query: { base: theme.id } })}
+                        title="Crear un tema nuevo a partir de este"
+                    >
+                        <Copy className="size-3.5" />
+                        Duplicar
+                    </Link>
+                </Button>
+
+                {canDelete && (
+                    <Button
+                        size="icon"
+                        variant="ghost"
+                        onClick={onDelete}
+                        title="Eliminar"
+                        aria-label={`Eliminar ${theme.name}`}
+                        className="ml-auto size-8 text-destructive hover:text-destructive"
+                    >
+                        <Trash2 className="size-4" />
+                    </Button>
+                )}
+            </CardFooter>
+        </Card>
+    );
+}
+
 ThemeManagementIndex.layout = {
     breadcrumbs: [
-        {
-            title: 'Panel',
-            href: '/panel/dashboard',
-        },
-        {
-            title: 'Configuración',
-            href: '#',
-        },
-        {
-            title: 'Personalización y Apariencia',
-            href: '/panel/configuracion/personalizacion',
-        },
+        { title: 'Panel', href: dashboard().url },
+        { title: 'Configuración', href: '#' },
+        { title: 'Personalización', href: index().url },
     ],
 };

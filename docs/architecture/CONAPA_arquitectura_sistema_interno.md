@@ -198,8 +198,10 @@ Sembrar con un **seeder data-driven** (arreglo de configuración, no hardcodeado
 |---|---|---|
 | *(sin prefijo)* | Público general | `/`, `/proyectos`, `/convenios`, `/denuncias`, `/reconocimiento`, `/voluntarios`, `/contactanos`, `/donaciones` |
 | `/login`, `/registro` | Todos | Autenticación única, redirección según `tipo_usuario` |
-| `/portal/...` | Externos | `/portal/dashboard`, `/portal/donaciones`, `/portal/voluntariado`, `/portal/convenio`, `/portal/denuncias` |
-| `/panel/...` | Internos | `/panel/dashboard`, `/panel/casos`, `/panel/albergues`, `/panel/veterinaria`, `/panel/voluntariado`, `/panel/donaciones`, `/panel/contenidos`, `/panel/usuarios`, `/panel/configuracion`, `/panel/auditoria` |
+| `/portal/...` | Externos | `/portal/dashboard`, `/portal/donaciones`, `/portal/voluntariado`, `/portal/convenio`, `/portal/denuncias`, `/portal/settings/...` |
+| `/panel/...` | Internos | `/panel/dashboard`, `/panel/casos`, `/panel/albergues`, `/panel/veterinaria`, `/panel/voluntariado`, `/panel/donaciones`, `/panel/contenidos`, `/panel/usuarios`, `/panel/configuracion`, `/panel/auditoria`, `/panel/settings/...` |
+
+> **Ajustes de cuenta y personalización:** los ajustes de cuenta (perfil, seguridad, apariencia) viven dentro del área de cada usuario (`/panel/settings/...` o `/portal/settings/...`), y la personalización visual (modo, tamaño de letra, tema de color) solo se aplica dentro de `/panel` y `/portal`. Ver [CONAPA_personalizacion.md](CONAPA_personalizacion.md), sección 6.
 
 > **Nota sobre la integración Frontend/Backend:** No se utiliza una API REST independiente para el SPA. Toda la comunicación y transferencia de datos entre Laravel y React se gestiona mediante **Inertia.js** a través de controladores Inertia (`Inertia::render()`) y propiedades compartidas (`HandleInertiaRequests`).
 

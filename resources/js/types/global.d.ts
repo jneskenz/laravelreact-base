@@ -1,3 +1,5 @@
+import type { DbTheme } from '@/hooks/use-appearance';
+import type { UserArea } from '@/lib/area';
 import type { Auth } from '@/types/auth';
 import type { MenuItemData } from '@/types/navigation';
 
@@ -14,7 +16,9 @@ declare module '@inertiajs/core' {
             name: string;
             auth: Auth;
             sidebarOpen: boolean;
+            area: UserArea | null;
             menu: MenuItemData[];
+            defaultTheme: DbTheme | null;
             [key: string]: unknown;
         };
     }

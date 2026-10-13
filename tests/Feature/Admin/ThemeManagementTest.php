@@ -187,7 +187,137 @@ test('cannot delete a system theme', function () {
 
     $this->actingAs($admin)
         ->delete(route('panel.configuracion.personalizacion.destroy', $systemTheme))
-        ->assertRedirect();
+        ->assertRedirect()
+        ->assertInertiaFlash('toast.type', 'error');
 
     $this->assertDatabaseHas('themes', ['id' => $systemTheme->id]);
+});
+
+/**
+ * Create a non-system theme that copies the colors of the default seeded theme.
+ */
+function makeCustomTheme(array $attributes = []): Theme
+{
+    $base = Theme::query()->where('slug', 'verde-esperanza')->firstOrFail();
+
+    return Theme::create([
+        'name' => 'Tema Personalizado',
+        'slug' => 'tema-personalizado',
+        'color' => $base->color,
+        'radius' => $base->radius,
+        'modes_config' => $base->modes_config,
+        'is_system' => false,
+        'is_default' => false,
+        ...$attributes,
+    ]);
+}
+
+test('create page uses the requested theme as base', function () {
+    $admin = User::factory()->create(['tipo_usuario' => 'interno']);
+    $admin->givePermissionTo('configuracion.editar');
+
+    $base = Theme::query()->where('slug', 'azul-oceano')->first();
+
+    $this->actingAs($admin)
+        ->get(route('panel.configuracion.personalizacion.create', ['base' => $base->id]))
+        ->assertInertia(fn (Assert $page) => $page->where('baseTheme.id', $base->id));
+});
+
+test('rejects colors that are not in the #rrggbb format', function () {
+    $admin = User::factory()->create(['tipo_usuario' => 'interno']);
+    $admin->givePermissionTo('configuracion.editar');
+
+    $modes = Theme::query()->first()->modes_config;
+    $modes['dark']['primary'] = 'red';
+
+    $this->actingAs($admin)
+        ->post(route('panel.configuracion.personalizacion.store'), [
+            'name' => 'Tema inválido',
+            'color' => '#12',
+            'radius' => '0.625rem',
+            'modes_config' => $modes,
+        ])
+        ->assertSessionHasErrors(['color', 'modes_config.dark.primary']);
+
+    $this->assertDatabaseMissing('themes', ['name' => 'Tema inválido']);
+});
+
+test('saving the default theme cannot leave the organization without a default', function () {
+    $admin = User::factory()->create(['tipo_usuario' => 'interno']);
+    $admin->givePermissionTo('configuracion.editar');
+
+    $default = Theme::query()->where('is_default', true)->first();
+
+    $this->actingAs($admin)
+        ->put(route('panel.configuracion.personalizacion.update', $default), [
+            'name' => $default->name,
+            'color' => $default->color,
+            'radius' => $default->radius,
+            'modes_config' => $default->modes_config,
+            'is_default' => false,
+        ])
+        ->assertInertiaFlash('toast.type', 'success');
+
+    expect($default->fresh()->is_default)->toBeTrue();
+});
+
+test('updating a theme refreshes the copy stored for users who selected it', function () {
+    $admin = User::factory()->create(['tipo_usuario' => 'interno']);
+    $admin->givePermissionTo('configuracion.editar');
+
+    $theme = makeCustomTheme();
+    $member = User::factory()->create([
+        'theme_settings' => ['active_theme_id' => $theme->id, 'active_theme' => ['id' => $theme->id, 'color' => $theme->color]],
+    ]);
+
+    $this->actingAs($admin)
+        ->put(route('panel.configuracion.personalizacion.update', $theme), [
+            'name' => 'Tema Renombrado',
+            'color' => '#8b5cf6',
+            'radius' => '1rem',
+            'modes_config' => $theme->modes_config,
+        ]);
+
+    expect($member->fresh()->theme_settings['active_theme'])
+        ->toMatchArray(['name' => 'Tema Renombrado', 'color' => '#8b5cf6', 'radius' => '1rem']);
+});
+
+test('deleting a custom theme returns its users to the default theme', function () {
+    $admin = User::factory()->create(['tipo_usuario' => 'interno']);
+    $admin->givePermissionTo('configuracion.editar');
+
+    $theme = makeCustomTheme();
+    $member = User::factory()->create([
+        'theme_settings' => ['appearance' => 'dark', 'active_theme_id' => $theme->id, 'active_theme' => ['id' => $theme->id]],
+    ]);
+
+    $this->actingAs($admin)
+        ->delete(route('panel.configuracion.personalizacion.destroy', $theme))
+        ->assertRedirect(route('panel.configuracion.personalizacion.index'))
+        ->assertInertiaFlash('toast.type', 'success');
+
+    $this->assertDatabaseMissing('themes', ['id' => $theme->id]);
+    expect($member->fresh()->theme_settings)->toBe(['appearance' => 'dark']);
+});
+
+test('deleting the default theme is refused with an error message', function () {
+    $admin = User::factory()->create(['tipo_usuario' => 'interno']);
+    $admin->givePermissionTo('configuracion.editar');
+
+    $theme = makeCustomTheme(['is_default' => true]);
+
+    $this->actingAs($admin)
+        ->delete(route('panel.configuracion.personalizacion.destroy', $theme))
+        ->assertInertiaFlash('toast.type', 'error');
+
+    $this->assertDatabaseHas('themes', ['id' => $theme->id]);
+});
+
+test('the default theme is shared with authenticated users', function () {
+    $user = User::factory()->create(['tipo_usuario' => 'interno']);
+    $default = Theme::query()->where('is_default', true)->first();
+
+    $this->actingAs($user)
+        ->get(route('panel.dashboard'))
+        ->assertInertia(fn (Assert $page) => $page->where('defaultTheme.id', $default->id));
 });

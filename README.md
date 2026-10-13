@@ -75,7 +75,7 @@ routes/
 ├── web.php                     # Público + redirección de /dashboard según tipo_usuario
 ├── panel.php                   # Rutas internas (/panel, nombres panel.*)
 ├── portal.php                  # Rutas externas (/portal, nombres portal.*)
-└── settings.php                # Configuración de la cuenta del usuario
+└── settings.php                # Ajustes de cuenta: /panel/settings (internos) o /portal/settings (externos)
 ```
 
 ## Módulos implementados

@@ -10,6 +10,8 @@ import ManageTwoFactor from '@/components/manage-two-factor';
 import PasswordInput from '@/components/password-input';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import type { UserArea } from '@/lib/area';
+import { syncUrlArea } from '@/lib/area';
 import { edit } from '@/routes/security';
 
 type Props = {
@@ -137,11 +139,15 @@ export default function Security(props: Props) {
     );
 }
 
-Security.layout = {
-    breadcrumbs: [
-        {
-            title: 'Security settings',
-            href: edit(),
-        },
-    ],
+Security.layout = ({ area }: { area: UserArea | null }) => {
+    syncUrlArea(area);
+
+    return {
+        breadcrumbs: [
+            {
+                title: 'Security settings',
+                href: edit(),
+            },
+        ],
+    };
 };

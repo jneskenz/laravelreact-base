@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Models\MenuItem;
+use App\Models\Theme;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -45,7 +46,11 @@ class HandleInertiaRequests extends Middleware
                 'user' => $user,
                 'session_id' => $user ? $request->session()->getId() : null,
             ],
+            'area' => $user?->area(),
             'menu' => fn () => $user ? MenuItem::treeForUser($user) : [],
+            'defaultTheme' => fn () => $user
+                ? Theme::default()?->only(['id', 'name', 'slug', 'color', 'radius', 'modes_config', 'updated_at'])
+                : null,
             'sidebarOpen' => ! $request->hasCookie('sidebar_state') || $request->cookie('sidebar_state') === 'true',
         ];
     }

@@ -20,7 +20,7 @@ use Spatie\Permission\Traits\HasRoles;
  * @property string $name
  * @property string $email
  * @property string $tipo_usuario
- * @property string|null $theme_settings
+ * @property array<string, mixed>|null $theme_settings
  * @property Carbon|null $email_verified_at
  * @property string $password
  * @property string|null $two_factor_secret
@@ -50,5 +50,13 @@ class User extends Authenticatable implements PasskeyUser
             'two_factor_confirmed_at' => 'datetime',
             'theme_settings' => 'array',
         ];
+    }
+
+    /**
+     * Route prefix of the area this user works in: "panel" for internal staff, "portal" for everyone else.
+     */
+    public function area(): string
+    {
+        return $this->tipo_usuario === 'interno' ? 'panel' : 'portal';
     }
 }

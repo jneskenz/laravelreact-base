@@ -17,7 +17,7 @@ use Illuminate\Support\Carbon;
  * @property bool $is_default
  * @property string $color
  * @property string $radius
- * @property array $modes_config
+ * @property array<string, array<string, string>> $modes_config
  * @property int|null $created_by
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
@@ -50,6 +50,15 @@ class Theme extends Model
             'is_default' => 'boolean',
             'modes_config' => 'array',
         ];
+    }
+
+    /**
+     * The organizational default theme, or the first available theme when none is marked.
+     */
+    public static function default(): ?self
+    {
+        return static::query()->where('is_default', true)->first()
+            ?? static::query()->orderBy('id')->first();
     }
 
     /**

@@ -5,8 +5,8 @@ project: "CONAPA"
 subproject: "Sistema Interno (backoffice + portal externo)"
 stack: ["Laravel 13", "React", "Spatie Permission"]
 status: "vigente"
-version: "1.0"
-last_updated: "2026-08-30"
+version: "1.1"
+last_updated: "2026-10-12"
 source_reference: "CONAPA_arquitectura_sistema_interno.md"
 tags: ["menus", "navegacion", "modulos", "fase1", "fase2", "ong"]
 ---
@@ -185,6 +185,7 @@ Accesible por usuarios internos: `super-admin`, `admin`, `content-admin`.
 | Submenú | Ruta esperada | `permission_required` |
 |---|---|---|
 | Datos de la organización | `/panel/configuracion/organizacion` | `configuracion.editar` |
+| Personalización y Apariencia (temas de color institucionales — ver [CONAPA_personalizacion.md](CONAPA_personalizacion.md)) | `/panel/configuracion/personalizacion` | `configuracion.editar` |
 | Módulos activos/inactivos (toggle de `config/ngo-modules.php` desde UI) | `/panel/configuracion/modulos` | `configuracion.editar` |
 | Parámetros generales (numeración de casos, formato de códigos de seguimiento) | `/panel/configuracion/parametros` | `configuracion.editar` |
 | Plantillas de notificaciones (correo/SMS) | `/panel/configuracion/notificaciones` | `configuracion.editar` |

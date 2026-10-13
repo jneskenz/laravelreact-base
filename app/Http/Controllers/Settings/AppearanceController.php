@@ -28,6 +28,7 @@ class AppearanceController extends Controller
         return Inertia::render('settings/appearance', [
             'themes' => $themes,
             'defaultThemeId' => $defaultTheme?->id,
+            'canManageThemes' => $request->user()->can('configuracion.editar'),
         ]);
     }
 

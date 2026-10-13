@@ -1,5 +1,6 @@
 import { router } from '@inertiajs/react';
 import { useSyncExternalStore } from 'react';
+import { update as updateAppearanceRoute } from '@/routes/appearance';
 
 export type AppearanceMode = 'light' | 'dark' | 'system' | 'eye-care' | 'semi-dark' | 'custom';
 export type Appearance = AppearanceMode;
@@ -84,6 +85,14 @@ let globalLayoutType: LayoutType = (getStoredString('appearance_layout', 'sideba
 let globalActiveTheme: DbTheme | null = getStoredJson<DbTheme>('appearance_active_theme', null);
 let globalActiveThemeId: number | null = globalActiveTheme?.id || null;
 let globalCustomOverrides: Partial<SemanticColors> | null = null;
+let globalDefaultTheme: DbTheme | null = null;
+
+/**
+ * The theme the user picked, or the organization's default theme when they never picked one.
+ */
+function effectiveTheme(): DbTheme | null {
+    return globalActiveTheme ?? globalDefaultTheme;
+}
 
 const listeners = new Set<() => void>();
 const notify = () => listeners.forEach((l) => l());
@@ -104,6 +113,28 @@ function resolveEffectiveMode(appearance: AppearanceMode): 'light' | 'dark' | 'e
     return appearance;
 }
 
+const THEME_CSS_VARIABLES = [
+    '--radius', '--background', '--foreground', '--card', '--border', '--primary', '--ring',
+    '--sidebar-primary', '--primary-foreground', '--sidebar-primary-foreground', '--secondary',
+    '--success', '--warning', '--danger', '--destructive', '--alert', '--muted', '--light', '--dark',
+];
+
+/**
+ * The personalization (mode, font size and theme colors) only applies inside the
+ * internal panel (/panel) and the external portal (/portal). Public and auth pages
+ * always use the base styles from app.css.
+ */
+export function isThemedPath(pathname: string = window.location.pathname): boolean {
+    return /^\/(panel|portal)(\/|$)/.test(pathname);
+}
+
+function resetThemeOnDom(root: HTMLElement) {
+    root.classList.remove('dark', 'eye-care', 'semi-dark', 'custom-mode');
+    root.style.colorScheme = '';
+    root.style.fontSize = '';
+    THEME_CSS_VARIABLES.forEach((variable) => root.style.removeProperty(variable));
+}
+
 export function applyThemeToDom(
     appearance: AppearanceMode,
     fontSize: FontSize,
@@ -113,6 +144,12 @@ export function applyThemeToDom(
     if (typeof document === 'undefined') return;
 
     const root = document.documentElement;
+
+    if (!isThemedPath()) {
+        resetThemeOnDom(root);
+
+        return;
+    }
     const effective = resolveEffectiveMode(appearance);
 
     // 1. Mode Classes on <html>
@@ -181,11 +218,16 @@ export function initializeTheme() {
             globalActiveThemeId = globalActiveTheme.id;
         }
 
-        applyThemeToDom(globalAppearance, globalFontSize, globalActiveTheme);
+        applyThemeToDom(globalAppearance, globalFontSize, effectiveTheme());
+
+        // Re-evaluate on every Inertia navigation: entering /panel or /portal applies the theme, leaving it resets it
+        router.on('navigate', () => {
+            applyThemeToDom(globalAppearance, globalFontSize, effectiveTheme(), globalCustomOverrides);
+        });
 
         window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
             if (globalAppearance === 'system') {
-                applyThemeToDom('system', globalFontSize, globalActiveTheme);
+                applyThemeToDom('system', globalFontSize, effectiveTheme());
             }
         });
     } catch {
@@ -223,10 +265,26 @@ export function applyThemeSettingsToStorage(settings?: UserThemeSettings | null)
             globalCustomOverrides = settings.custom_overrides;
         }
 
-        applyThemeToDom(globalAppearance, globalFontSize, globalActiveTheme, globalCustomOverrides);
+        applyThemeToDom(globalAppearance, globalFontSize, effectiveTheme(), globalCustomOverrides);
         notify();
     } catch {
         // Safe fallback
+    }
+}
+
+/**
+ * Register the organization's default theme (shared by the server) and apply it
+ * when the user has not selected a theme of their own.
+ */
+export function applyDefaultTheme(theme?: DbTheme | null) {
+    if (typeof window === 'undefined' || !theme) {
+        return;
+    }
+
+    globalDefaultTheme = theme;
+
+    if (!globalActiveTheme) {
+        applyThemeToDom(globalAppearance, globalFontSize, effectiveTheme(), globalCustomOverrides);
     }
 }
 
@@ -257,7 +315,7 @@ export function useAppearance() {
 
     function syncToDatabase(payload: Partial<UserThemeSettings>) {
         router.patch(
-            '/settings/appearance',
+            updateAppearanceRoute.url(),
             {
                 appearance: globalAppearance,
                 font_size: globalFontSize,
@@ -278,7 +336,7 @@ export function useAppearance() {
         if (typeof window !== 'undefined') {
             localStorage.setItem('appearance_mode', newMode);
         }
-        applyThemeToDom(globalAppearance, globalFontSize, globalActiveTheme, globalCustomOverrides);
+        applyThemeToDom(globalAppearance, globalFontSize, effectiveTheme(), globalCustomOverrides);
         notify();
         syncToDatabase({ appearance: newMode });
     }
@@ -288,7 +346,7 @@ export function useAppearance() {
         if (typeof window !== 'undefined') {
             localStorage.setItem('appearance_font_size', newSize);
         }
-        applyThemeToDom(globalAppearance, globalFontSize, globalActiveTheme, globalCustomOverrides);
+        applyThemeToDom(globalAppearance, globalFontSize, effectiveTheme(), globalCustomOverrides);
         notify();
         syncToDatabase({ font_size: newSize });
     }
@@ -309,7 +367,7 @@ export function useAppearance() {
             localStorage.setItem('appearance_active_theme', JSON.stringify(theme));
         }
 
-        applyThemeToDom(globalAppearance, globalFontSize, globalActiveTheme, globalCustomOverrides);
+        applyThemeToDom(globalAppearance, globalFontSize, effectiveTheme(), globalCustomOverrides);
         notify();
         syncToDatabase({ active_theme_id: theme.id });
     }

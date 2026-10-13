@@ -8,6 +8,9 @@
         <script>
             (function() {
                 try {
+                    // La personalización solo aplica dentro de /panel y /portal
+                    if (!/^\/(panel|portal)(\/|$)/.test(window.location.pathname)) return;
+
                     const mode = localStorage.getItem('appearance_mode') || 'system';
                     let effective = mode;
                     if (effective === 'system') {

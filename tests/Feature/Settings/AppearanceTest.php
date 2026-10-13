@@ -2,10 +2,15 @@
 
 use App\Models\Theme;
 use App\Models\User;
+use Illuminate\Support\Facades\URL;
 use Inertia\Testing\AssertableInertia as Assert;
 
+/*
+ * Factory users are external, so their settings live under /portal/settings/....
+ */
 beforeEach(function () {
     $this->artisan('db:seed', ['--class' => 'ThemeSeeder']);
+    URL::defaults(['area' => 'portal']);
 });
 
 test('guests cannot access appearance settings', function () {

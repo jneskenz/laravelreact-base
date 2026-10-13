@@ -7,6 +7,8 @@ import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import type { UserArea } from '@/lib/area';
+import { syncUrlArea } from '@/lib/area';
 import { edit } from '@/routes/profile';
 import { send } from '@/routes/verification';
 import type { Auth } from '@/types';
@@ -128,11 +130,15 @@ export default function Profile({
     );
 }
 
-Profile.layout = {
-    breadcrumbs: [
-        {
-            title: 'Profile settings',
-            href: edit(),
-        },
-    ],
+Profile.layout = ({ area }: { area: UserArea | null }) => {
+    syncUrlArea(area);
+
+    return {
+        breadcrumbs: [
+            {
+                title: 'Profile settings',
+                href: edit(),
+            },
+        ],
+    };
 };

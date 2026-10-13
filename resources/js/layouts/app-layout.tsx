@@ -1,8 +1,9 @@
-import { useEffect } from 'react';
 import { usePage } from '@inertiajs/react';
+import { useEffect } from 'react';
+import { useAppearance, applyDefaultTheme, applyThemeSettingsToStorage } from '@/hooks/use-appearance';
 import AppHeaderLayout from '@/layouts/app/app-header-layout';
 import AppSidebarLayout from '@/layouts/app/app-sidebar-layout';
-import { useAppearance, applyThemeSettingsToStorage } from '@/hooks/use-appearance';
+import { syncUrlArea } from '@/lib/area';
 import type { BreadcrumbItem } from '@/types';
 
 export default function AppLayout({
@@ -15,9 +16,14 @@ export default function AppLayout({
     const page = usePage();
     const { layoutType } = useAppearance();
 
+    // Rutas con prefijo {area} (p. ej. ajustes): /panel/... para internos, /portal/... para externos
+    syncUrlArea(page.props.area);
+
     // Sincronizar apariencia de la base de datos EXCLUSIVAMENTE cuando se detecta un nuevo inicio de sesión (nueva sesión de auth)
     useEffect(() => {
-        if (typeof window === 'undefined') return;
+        if (typeof window === 'undefined') {
+return;
+}
 
         const auth = (page.props.auth as any);
         const authUser = auth?.user;
@@ -36,6 +42,11 @@ export default function AppLayout({
             }
         }
     }, [page.props.auth]);
+
+    // Tema por defecto de la organización: se usa mientras el usuario no haya elegido uno propio
+    useEffect(() => {
+        applyDefaultTheme(page.props.defaultTheme);
+    }, [page.props.defaultTheme]);
 
     if (layoutType === 'header') {
         return (

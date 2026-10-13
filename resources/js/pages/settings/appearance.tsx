@@ -1,4 +1,4 @@
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import {
     Sun,
     Moon,
@@ -15,21 +15,26 @@ import {
     Shield,
 } from 'lucide-react';
 import Heading from '@/components/heading';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import {
-    useAppearance,
-    type AppearanceMode,
-    type FontSize,
-    type LayoutType,
-    type DbTheme,
+    useAppearance
+    
+    
+    
+    
 } from '@/hooks/use-appearance';
+import type {AppearanceMode, FontSize, LayoutType, DbTheme} from '@/hooks/use-appearance';
+import type { UserArea } from '@/lib/area';
+import { syncUrlArea } from '@/lib/area';
 import { edit as editAppearance } from '@/routes/appearance';
+import personalizacion from '@/routes/panel/configuracion/personalizacion';
 
 interface Props {
     themes?: DbTheme[];
     defaultThemeId?: number;
+    canManageThemes?: boolean;
 }
 
 const VISUAL_MODES: {
@@ -84,8 +89,7 @@ const LAYOUT_OPTIONS: { id: LayoutType; label: string; desc: string; icon: typeo
     { id: 'header', label: 'Barra Horizontal', desc: 'Barra superior con navegación continua', icon: PanelTop },
 ];
 
-export default function Appearance({ themes = [], defaultThemeId }: Props) {
-    const page = usePage();
+export default function Appearance({ themes = [], defaultThemeId, canManageThemes = false }: Props) {
     const {
         appearance,
         fontSize,
@@ -96,8 +100,6 @@ export default function Appearance({ themes = [], defaultThemeId }: Props) {
         updateLayout,
         selectTheme,
     } = useAppearance();
-
-    const canManageThemes = (page.props.auth as any)?.user?.can_manage_config ?? true; // Or check permission
 
     return (
         <>
@@ -168,12 +170,14 @@ export default function Appearance({ themes = [], defaultThemeId }: Props) {
                             />
                         </div>
 
-                        <Button size="sm" variant="outline" asChild className="gap-1.5 shrink-0 text-xs">
-                            <Link href="/panel/configuracion/personalizacion">
-                                <Palette className="size-3.5" />
-                                Administrar Temas
-                            </Link>
-                        </Button>
+                        {canManageThemes && (
+                            <Button size="sm" variant="outline" asChild className="gap-1.5 shrink-0 text-xs">
+                                <Link href={personalizacion.index()}>
+                                    <Palette className="size-3.5" />
+                                    Administrar Temas
+                                </Link>
+                            </Button>
+                        )}
                     </div>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 pt-2">
@@ -245,6 +249,7 @@ export default function Appearance({ themes = [], defaultThemeId }: Props) {
                     <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                         {FONT_SIZES.map((f) => {
                             const isSelected = fontSize === f.id;
+
                             return (
                                 <button
                                     key={f.id}
@@ -318,15 +323,19 @@ export default function Appearance({ themes = [], defaultThemeId }: Props) {
     );
 }
 
-Appearance.layout = {
-    breadcrumbs: [
-        {
-            title: 'Configuración',
-            href: '#',
-        },
-        {
-            title: 'Apariencia',
-            href: editAppearance(),
-        },
-    ],
+Appearance.layout = ({ area }: { area: UserArea | null }) => {
+    syncUrlArea(area);
+
+    return {
+        breadcrumbs: [
+            {
+                title: 'Configuración',
+                href: '#',
+            },
+            {
+                title: 'Apariencia',
+                href: editAppearance(),
+            },
+        ],
+    };
 };

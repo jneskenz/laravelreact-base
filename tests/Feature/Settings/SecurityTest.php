@@ -2,8 +2,16 @@
 
 use App\Models\User;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\URL;
 use Inertia\Testing\AssertableInertia as Assert;
 use Laravel\Fortify\Features;
+
+/*
+ * Factory users are external, so their settings live under /portal/settings/....
+ */
+beforeEach(function () {
+    URL::defaults(['area' => 'portal']);
+});
 
 test('security page is displayed', function () {
     $this->skipUnlessFortifyHas(Features::twoFactorAuthentication());

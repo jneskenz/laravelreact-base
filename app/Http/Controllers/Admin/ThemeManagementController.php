@@ -6,7 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\StoreThemeRequest;
 use App\Http\Requests\Admin\UpdateThemeRequest;
 use App\Models\Theme;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -23,6 +26,7 @@ class ThemeManagementController extends Controller
         $themes = Theme::query()
             ->with('creator:id,name,email')
             ->orderByDesc('is_default')
+            ->orderByDesc('is_system')
             ->orderBy('name')
             ->get();
 
@@ -32,17 +36,17 @@ class ThemeManagementController extends Controller
     }
 
     /**
-     * Show the form for creating a new theme.
+     * Show the form for creating a new theme, optionally based on an existing one.
      */
-    public function create(): Response
+    public function create(Request $request): Response
     {
         abort_unless(auth()->user()?->can('configuracion.editar'), 403);
 
-        $defaultTheme = Theme::query()->where('is_default', true)->first()
-            ?? Theme::query()->first();
+        $baseTheme = Theme::query()->find($request->integer('base'))
+            ?? Theme::default();
 
         return Inertia::render('admin/configuracion/personalizacion/create', [
-            'baseTheme' => $defaultTheme,
+            'baseTheme' => $baseTheme,
         ]);
     }
 
@@ -52,36 +56,30 @@ class ThemeManagementController extends Controller
     public function store(StoreThemeRequest $request): RedirectResponse
     {
         $validated = $request->validated();
-        $slug = Str::slug($validated['name']);
 
-        // Ensure unique slug
-        $originalSlug = $slug;
-        $count = 1;
-        while (Theme::query()->where('slug', $slug)->exists()) {
-            $slug = "{$originalSlug}-{$count}";
-            $count++;
-        }
+        $theme = DB::transaction(function () use ($validated, $request): Theme {
+            $isDefault = (bool) ($validated['is_default'] ?? false);
 
-        $isDefault = $validated['is_default'] ?? false;
-        if ($isDefault) {
-            Theme::query()->where('is_default', true)->update(['is_default' => false]);
-        }
+            if ($isDefault) {
+                Theme::query()->where('is_default', true)->update(['is_default' => false]);
+            }
 
-        $theme = Theme::create([
-            'name' => $validated['name'],
-            'slug' => $slug,
-            'description' => $validated['description'] ?? null,
-            'color' => $validated['color'],
-            'radius' => $validated['radius'],
-            'modes_config' => $validated['modes_config'],
-            'is_system' => false,
-            'is_default' => $isDefault,
-            'created_by' => $request->user()?->id,
-        ]);
+            return Theme::create([
+                'name' => $validated['name'],
+                'slug' => $this->uniqueSlug($validated['name']),
+                'description' => $validated['description'] ?? null,
+                'color' => $validated['color'],
+                'radius' => $validated['radius'],
+                'modes_config' => $validated['modes_config'],
+                'is_system' => false,
+                'is_default' => $isDefault,
+                'created_by' => $request->user()?->id,
+            ]);
+        });
 
-        return redirect()
-            ->route('panel.configuracion.personalizacion.index')
-            ->with('success', "Tema '{$theme->name}' creado exitosamente.");
+        Inertia::flash('toast', ['type' => 'success', 'message' => "Tema '{$theme->name}' creado correctamente."]);
+
+        return to_route('panel.configuracion.personalizacion.index');
     }
 
     /**
@@ -93,33 +91,42 @@ class ThemeManagementController extends Controller
 
         return Inertia::render('admin/configuracion/personalizacion/edit', [
             'theme' => $theme,
+            'usersCount' => User::query()->where('theme_settings->active_theme_id', $theme->id)->count(),
         ]);
     }
 
     /**
      * Update the specified theme in storage.
+     *
+     * The default theme cannot be unmarked from here: another theme must be
+     * made the default instead, so the organization always has one.
      */
     public function update(UpdateThemeRequest $request, Theme $theme): RedirectResponse
     {
         $validated = $request->validated();
 
-        $isDefault = $validated['is_default'] ?? $theme->is_default;
-        if ($isDefault && ! $theme->is_default) {
-            Theme::query()->where('is_default', true)->update(['is_default' => false]);
-        }
+        DB::transaction(function () use ($validated, $theme): void {
+            $isDefault = $theme->is_default || (bool) ($validated['is_default'] ?? false);
 
-        $theme->update([
-            'name' => $validated['name'],
-            'description' => $validated['description'] ?? null,
-            'color' => $validated['color'],
-            'radius' => $validated['radius'],
-            'modes_config' => $validated['modes_config'],
-            'is_default' => $isDefault,
-        ]);
+            if ($isDefault && ! $theme->is_default) {
+                Theme::query()->where('is_default', true)->update(['is_default' => false]);
+            }
 
-        return redirect()
-            ->route('panel.configuracion.personalizacion.index')
-            ->with('success', "Tema '{$theme->name}' actualizado correctamente.");
+            $theme->update([
+                'name' => $validated['name'],
+                'description' => $validated['description'] ?? null,
+                'color' => $validated['color'],
+                'radius' => $validated['radius'],
+                'modes_config' => $validated['modes_config'],
+                'is_default' => $isDefault,
+            ]);
+
+            $this->refreshUsersSnapshot($theme);
+        });
+
+        Inertia::flash('toast', ['type' => 'success', 'message' => "Tema '{$theme->name}' actualizado correctamente."]);
+
+        return to_route('panel.configuracion.personalizacion.index');
     }
 
     /**
@@ -129,12 +136,14 @@ class ThemeManagementController extends Controller
     {
         abort_unless(auth()->user()?->can('configuracion.editar'), 403);
 
-        Theme::query()->where('is_default', true)->update(['is_default' => false]);
-        $theme->update(['is_default' => true]);
+        DB::transaction(function () use ($theme): void {
+            Theme::query()->where('is_default', true)->update(['is_default' => false]);
+            $theme->update(['is_default' => true]);
+        });
 
-        return redirect()
-            ->back()
-            ->with('success', "El tema '{$theme->name}' ha sido establecido como el tema por defecto.");
+        Inertia::flash('toast', ['type' => 'success', 'message' => "'{$theme->name}' es ahora el tema por defecto."]);
+
+        return back();
     }
 
     /**
@@ -145,22 +154,71 @@ class ThemeManagementController extends Controller
         abort_unless(auth()->user()?->can('configuracion.editar'), 403);
 
         if ($theme->is_system) {
-            return redirect()
-                ->back()
-                ->with('error', 'Los temas predeterminados del sistema no pueden ser eliminados.');
+            Inertia::flash('toast', ['type' => 'error', 'message' => 'Los temas del sistema no se pueden eliminar.']);
+
+            return back();
         }
 
         if ($theme->is_default) {
-            return redirect()
-                ->back()
-                ->with('error', 'No se puede eliminar el tema que está actualmente configurado por defecto.');
+            Inertia::flash('toast', ['type' => 'error', 'message' => 'No se puede eliminar el tema por defecto. Elige otro tema por defecto primero.']);
+
+            return back();
         }
 
         $name = $theme->name;
-        $theme->delete();
 
-        return redirect()
-            ->route('panel.configuracion.personalizacion.index')
-            ->with('success', "Tema '{$name}' eliminado correctamente.");
+        DB::transaction(function () use ($theme): void {
+            $this->forgetThemeForUsers($theme);
+            $theme->delete();
+        });
+
+        Inertia::flash('toast', ['type' => 'success', 'message' => "Tema '{$name}' eliminado correctamente."]);
+
+        return to_route('panel.configuracion.personalizacion.index');
+    }
+
+    /**
+     * Build a slug from the name that no other theme is using.
+     */
+    private function uniqueSlug(string $name): string
+    {
+        $baseSlug = Str::slug($name);
+        $slug = $baseSlug;
+        $suffix = 1;
+
+        while (Theme::query()->where('slug', $slug)->exists()) {
+            $slug = "{$baseSlug}-{$suffix}";
+            $suffix++;
+        }
+
+        return $slug;
+    }
+
+    /**
+     * Update the copy of the theme stored in the settings of users who selected it.
+     */
+    private function refreshUsersSnapshot(Theme $theme): void
+    {
+        User::query()
+            ->where('theme_settings->active_theme_id', $theme->id)
+            ->each(function (User $user) use ($theme): void {
+                $settings = $user->theme_settings ?? [];
+                $settings['active_theme'] = $theme->only(['id', 'name', 'slug', 'color', 'radius', 'modes_config']);
+                $user->update(['theme_settings' => $settings]);
+            });
+    }
+
+    /**
+     * Remove a deleted theme from the settings of users who selected it, so they fall back to the default theme.
+     */
+    private function forgetThemeForUsers(Theme $theme): void
+    {
+        User::query()
+            ->where('theme_settings->active_theme_id', $theme->id)
+            ->each(function (User $user): void {
+                $settings = $user->theme_settings ?? [];
+                unset($settings['active_theme_id'], $settings['active_theme']);
+                $user->update(['theme_settings' => $settings]);
+            });
     }
 }

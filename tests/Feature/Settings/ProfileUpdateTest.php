@@ -1,6 +1,14 @@
 <?php
 
 use App\Models\User;
+use Illuminate\Support\Facades\URL;
+
+/*
+ * Factory users are external, so their settings live under /portal/settings/....
+ */
+beforeEach(function () {
+    URL::defaults(['area' => 'portal']);
+});
 
 test('profile page is displayed', function () {
     $user = User::factory()->create();

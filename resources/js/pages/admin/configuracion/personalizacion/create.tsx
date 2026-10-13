@@ -1,6 +1,6 @@
 import { Head } from '@inertiajs/react';
-import { ThemeDesignerForm } from './components/theme-designer-form';
 import type { DbTheme } from '@/hooks/use-appearance';
+import { ThemeDesignerForm } from './components/theme-designer-form';
 
 interface Props {
     baseTheme?: DbTheme;
@@ -9,7 +9,7 @@ interface Props {
 export default function ThemeCreate({ baseTheme }: Props) {
     return (
         <>
-            <Head title="Crear Tema Institucional - Personalización" />
+            <Head title="Nuevo tema" />
             <ThemeDesignerForm theme={baseTheme} isEditing={false} />
         </>
     );
@@ -30,7 +30,7 @@ ThemeCreate.layout = {
             href: '/panel/configuracion/personalizacion',
         },
         {
-            title: 'Nuevo Tema',
+            title: 'Nuevo tema',
             href: '/panel/configuracion/personalizacion/create',
         },
     ],

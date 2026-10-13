@@ -1,16 +1,21 @@
 import { Head } from '@inertiajs/react';
-import { ThemeDesignerForm } from './components/theme-designer-form';
 import type { DbTheme } from '@/hooks/use-appearance';
+import { ThemeDesignerForm } from './components/theme-designer-form';
 
 interface Props {
     theme: DbTheme;
+    usersCount: number;
 }
 
-export default function ThemeEdit({ theme }: Props) {
+export default function ThemeEdit({ theme, usersCount }: Props) {
     return (
         <>
-            <Head title={`Editar Tema: ${theme.name} - Personalización`} />
-            <ThemeDesignerForm theme={theme} isEditing={true} />
+            <Head title={`Editar tema: ${theme.name}`} />
+            <ThemeDesignerForm
+                theme={theme}
+                isEditing
+                usersCount={usersCount}
+            />
         </>
     );
 }
@@ -30,7 +35,7 @@ ThemeEdit.layout = {
             href: '/panel/configuracion/personalizacion',
         },
         {
-            title: 'Editar Tema',
+            title: 'Editar tema',
             href: '#',
         },
     ],
