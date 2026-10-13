@@ -6,7 +6,7 @@ use App\Http\Controllers\Admin\ThemeManagementController;
 use App\Http\Controllers\Admin\UserController;
 use Illuminate\Support\Facades\Route;
 
-Route::middleware(['auth', 'verified'])->prefix('panel')->name('panel.')->group(function () {
+Route::middleware(['auth'])->prefix('panel')->name('panel.')->group(function () {
     // Dashboard interno
     Route::inertia('dashboard', 'dashboard')->name('dashboard');
 
@@ -34,6 +34,8 @@ Route::middleware(['auth', 'verified'])->prefix('panel')->name('panel.')->group(
     // Configuración - Personalización y Apariencia
     Route::prefix('configuracion')->name('configuracion.')->group(function () {
         Route::patch('personalizacion/{theme}/default', [ThemeManagementController::class, 'setDefault'])->name('personalizacion.default');
-        Route::resource('personalizacion', ThemeManagementController::class)->names('personalizacion');
+        Route::resource('personalizacion', ThemeManagementController::class)
+            ->parameters(['personalizacion' => 'theme'])
+            ->names('personalizacion');
     });
 });

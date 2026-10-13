@@ -35,6 +35,34 @@ test('users with permission can access theme management index', function () {
         );
 });
 
+test('users with permission can access theme create page', function () {
+    $admin = User::factory()->create(['tipo_usuario' => 'interno']);
+    $admin->givePermissionTo('configuracion.editar');
+
+    $this->actingAs($admin)
+        ->get(route('panel.configuracion.personalizacion.create'))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('admin/configuracion/personalizacion/create')
+            ->has('baseTheme')
+        );
+});
+
+test('users with permission can access theme edit page', function () {
+    $admin = User::factory()->create(['tipo_usuario' => 'interno']);
+    $admin->givePermissionTo('configuracion.editar');
+
+    $theme = Theme::query()->first();
+
+    $this->actingAs($admin)
+        ->get(route('panel.configuracion.personalizacion.edit', $theme))
+        ->assertOk()
+        ->assertInertia(fn (Assert $page) => $page
+            ->component('admin/configuracion/personalizacion/edit')
+            ->has('theme')
+        );
+});
+
 test('can create a new institutional theme with semantic color configs', function () {
     $admin = User::factory()->create(['tipo_usuario' => 'interno']);
     $admin->givePermissionTo('configuracion.editar');
@@ -110,6 +138,30 @@ test('can create a new institutional theme with semantic color configs', functio
         'color' => '#10b981',
         'is_system' => false,
     ]);
+});
+
+test('can update an existing theme', function () {
+    $admin = User::factory()->create(['tipo_usuario' => 'interno']);
+    $admin->givePermissionTo('configuracion.editar');
+
+    $theme = Theme::query()->first();
+
+    $payload = [
+        'name' => 'Tema Editado Especial',
+        'description' => 'Descripción actualizada',
+        'color' => '#8b5cf6',
+        'radius' => '1rem',
+        'is_default' => false,
+        'modes_config' => $theme->modes_config,
+    ];
+
+    $this->actingAs($admin)
+        ->put(route('panel.configuracion.personalizacion.update', $theme), $payload)
+        ->assertRedirect(route('panel.configuracion.personalizacion.index'));
+
+    expect($theme->fresh()->name)->toBe('Tema Editado Especial');
+    expect($theme->fresh()->color)->toBe('#8b5cf6');
+    expect($theme->fresh()->radius)->toBe('1rem');
 });
 
 test('can set a theme as default', function () {

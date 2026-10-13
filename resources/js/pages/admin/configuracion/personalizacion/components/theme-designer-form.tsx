@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { router, Link } from '@inertiajs/react';
+import { router, Link, usePage } from '@inertiajs/react';
 import {
     Sun,
     Moon,
@@ -11,12 +11,17 @@ import {
     Eye,
     Sparkles,
     Wand2,
+    Star,
+    Loader2,
 } from 'lucide-react';
+import { toast } from 'sonner';
 import Heading from '@/components/heading';
+import InputError from '@/components/input-error';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import type { DbTheme, SemanticColors, ThemeModeConfigs } from '@/hooks/use-appearance';
 
@@ -46,11 +51,13 @@ interface Props {
 }
 
 export function ThemeDesignerForm({ theme, isEditing = false }: Props) {
-    const [name, setName] = useState(theme?.name || '');
-    const [description, setDescription] = useState(theme?.description || '');
+    const { errors } = usePage().props as any;
+
+    const [name, setName] = useState(isEditing ? (theme?.name || '') : '');
+    const [description, setDescription] = useState(isEditing ? (theme?.description || '') : '');
     const [color, setColor] = useState(theme?.color || '#059669');
     const [radius, setRadius] = useState(theme?.radius || '0.625rem');
-    const [isDefault] = useState(theme?.is_default || false);
+    const [isDefault, setIsDefault] = useState(theme?.is_default || false);
 
     // Modes Config
     const [activeTab, setActiveTab] = useState<'light' | 'dark' | 'eye_care' | 'semi_dark'>('light');
@@ -160,6 +167,8 @@ export function ThemeDesignerForm({ theme, isEditing = false }: Props) {
                 primary: lightPrimary,
             },
         }));
+
+        toast.info('Se han sincronizado los colores primarios en todos los modos visuales.');
     }
 
     function handleSubmit(e: React.FormEvent) {
@@ -177,10 +186,24 @@ export function ThemeDesignerForm({ theme, isEditing = false }: Props) {
 
         if (isEditing && theme) {
             router.put(`/panel/configuracion/personalizacion/${theme.id}`, payload, {
+                preserveScroll: true,
+                onSuccess: () => {
+                    toast.success(`Tema "${name}" actualizado con éxito.`);
+                },
+                onError: (errs) => {
+                    toast.error('Ocurrió un error al actualizar el tema. Por favor revisa los campos.');
+                },
                 onFinish: () => setIsSubmitting(false),
             });
         } else {
             router.post('/panel/configuracion/personalizacion', payload, {
+                preserveScroll: true,
+                onSuccess: () => {
+                    toast.success(`Tema "${name}" creado con éxito.`);
+                },
+                onError: (errs) => {
+                    toast.error('Ocurrió un error al crear el tema. Por favor revisa los campos.');
+                },
                 onFinish: () => setIsSubmitting(false),
             });
         }
@@ -214,8 +237,17 @@ export function ThemeDesignerForm({ theme, isEditing = false }: Props) {
                         </Link>
                     </Button>
                     <Button type="submit" disabled={isSubmitting} size="sm" className="gap-2">
-                        <Save className="size-4" />
-                        {isEditing ? 'Guardar Cambios' : 'Crear Tema'}
+                        {isSubmitting ? (
+                            <>
+                                <Loader2 className="size-4 animate-spin" />
+                                Guardando...
+                            </>
+                        ) : (
+                            <>
+                                <Save className="size-4" />
+                                {isEditing ? 'Guardar Cambios' : 'Crear Tema'}
+                            </>
+                        )}
                     </Button>
                 </div>
             </div>
@@ -233,7 +265,7 @@ export function ThemeDesignerForm({ theme, isEditing = false }: Props) {
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 <div className="space-y-1.5">
                                     <Label htmlFor="theme-name" className="text-xs font-semibold">
-                                        Nombre del Tema
+                                        Nombre del Tema *
                                     </Label>
                                     <Input
                                         id="theme-name"
@@ -242,18 +274,19 @@ export function ThemeDesignerForm({ theme, isEditing = false }: Props) {
                                         placeholder="Ej: Verde Esperanza CONAPA"
                                         required
                                     />
+                                    <InputError message={errors?.name} />
                                 </div>
 
                                 <div className="space-y-1.5">
                                     <Label htmlFor="theme-color" className="text-xs font-semibold">
-                                        Color Representativo (Badge)
+                                        Color Representativo (Badge) *
                                     </Label>
                                     <div className="flex items-center gap-2">
                                         <input
                                             type="color"
                                             value={color}
                                             onChange={(e) => setColor(e.target.value)}
-                                            className="size-9 rounded border cursor-pointer p-0.5"
+                                            className="size-9 rounded border cursor-pointer p-0.5 shrink-0"
                                         />
                                         <Input
                                             id="theme-color"
@@ -263,6 +296,7 @@ export function ThemeDesignerForm({ theme, isEditing = false }: Props) {
                                             required
                                         />
                                     </div>
+                                    <InputError message={errors?.color} />
                                 </div>
                             </div>
 
@@ -276,11 +310,12 @@ export function ThemeDesignerForm({ theme, isEditing = false }: Props) {
                                     onChange={(e) => setDescription(e.target.value)}
                                     placeholder="Ej: Paleta oficial para rescates y bienestar animal..."
                                 />
+                                <InputError message={errors?.description} />
                             </div>
 
                             {/* Radio de Esquinas */}
                             <div className="space-y-2 pt-2 border-t">
-                                <Label className="text-xs font-semibold">Radio de Esquinas (Border Radius)</Label>
+                                <Label className="text-xs font-semibold">Radio de Esquinas (Border Radius) *</Label>
                                 <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
                                     {RADIUS_OPTIONS.map((opt) => (
                                         <button
@@ -289,7 +324,7 @@ export function ThemeDesignerForm({ theme, isEditing = false }: Props) {
                                             onClick={() => setRadius(opt.value)}
                                             className={`p-2 rounded-lg border text-center transition-all ${
                                                 radius === opt.value
-                                                    ? 'border-primary bg-primary/10 text-primary font-semibold'
+                                                    ? 'border-primary bg-primary/10 text-primary font-semibold ring-1 ring-primary'
                                                     : 'bg-card text-muted-foreground hover:text-foreground'
                                             }`}
                                         >
@@ -298,6 +333,23 @@ export function ThemeDesignerForm({ theme, isEditing = false }: Props) {
                                         </button>
                                     ))}
                                 </div>
+                                <InputError message={errors?.radius} />
+                            </div>
+
+                            {/* Establecer por defecto */}
+                            <div className="flex items-center space-x-2 pt-2 border-t">
+                                <Checkbox
+                                    id="is_default"
+                                    checked={isDefault}
+                                    onCheckedChange={(checked) => setIsDefault(!!checked)}
+                                />
+                                <Label
+                                    htmlFor="is_default"
+                                    className="text-xs font-medium cursor-pointer flex items-center gap-1.5"
+                                >
+                                    <Star className="size-3.5 text-amber-500" />
+                                    Establecer como tema por defecto de la organización
+                                </Label>
                             </div>
                         </CardContent>
                     </Card>
@@ -380,7 +432,7 @@ export function ThemeDesignerForm({ theme, isEditing = false }: Props) {
                                                     type="color"
                                                     value={currentModeConfig[item.key] || '#ffffff'}
                                                     onChange={(e) => updateColorInMode(activeTab, item.key, e.target.value)}
-                                                    className="size-7 rounded border cursor-pointer p-0"
+                                                    className="size-7 rounded border cursor-pointer p-0 shrink-0"
                                                 />
                                                 <Input
                                                     value={currentModeConfig[item.key] || ''}
@@ -404,7 +456,7 @@ export function ThemeDesignerForm({ theme, isEditing = false }: Props) {
                                             <div className="flex items-center justify-between">
                                                 <Label className="text-xs font-semibold">{label}</Label>
                                                 <span
-                                                    className="size-3.5 rounded-full border shadow-2xs"
+                                                    className="size-3.5 rounded-full border shadow-2xs shrink-0"
                                                     style={{ backgroundColor: currentModeConfig[key] || '#000000' }}
                                                 />
                                             </div>
@@ -413,7 +465,7 @@ export function ThemeDesignerForm({ theme, isEditing = false }: Props) {
                                                     type="color"
                                                     value={currentModeConfig[key] || '#000000'}
                                                     onChange={(e) => updateColorInMode(activeTab, key, e.target.value)}
-                                                    className="size-8 rounded border cursor-pointer p-0"
+                                                    className="size-8 rounded border cursor-pointer p-0 shrink-0"
                                                 />
                                                 <Input
                                                     value={currentModeConfig[key] || ''}
